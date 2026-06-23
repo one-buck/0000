@@ -79,3 +79,16 @@ class UserConnection(Base):
     device_type: Mapped[str] = mapped_column(String)
 
     user: Mapped["User"] = relationship(back_populates="connections")
+
+class Media(Base):
+    __tablename__ = "media"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    uploader_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
+    object_name: Mapped[str] = mapped_column(String, unique=True)
+    url: Mapped[str] = mapped_column(String)
+    filename: Mapped[str] = mapped_column(String)
+    kind: Mapped[str] = mapped_column(String)  # image | video | audio | file
+    size: Mapped[int] = mapped_column(Integer)
+    uploaded_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    uploader: Mapped["User"] = relationship()

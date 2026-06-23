@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional
 
 
 class UserCreate(BaseModel):
@@ -15,19 +15,27 @@ class UserResponse(BaseModel):
     id: int
     phone_number: str
     username: str
+    created_at: datetime
+    last_seen: datetime
     class Config:
         from_attributes = True
+
 
 class GroupCreate(BaseModel):
     name: str
     created_by: int
 
+class GroupUpdate(BaseModel):
+    name: str
+
 class GroupResponse(BaseModel):
     id: int
     name: str
-    created_by: int
+    created_by: Optional[int]
+    created_at: datetime
     class Config:
         from_attributes = True
+
 
 class MemberResponse(BaseModel):
     id: int
@@ -36,6 +44,7 @@ class MemberResponse(BaseModel):
     role: str
     class Config:
         from_attributes = True
+
 
 class MessageSend(BaseModel):
     sender_id: int
@@ -58,3 +67,30 @@ class MessageResponse(BaseModel):
 
 class StatusUpdate(BaseModel):
     status: str
+
+
+class MediaResponse(BaseModel):
+    id: int
+    uploader_id: int
+    url: str
+    filename: str
+    kind: str
+    size: int
+    uploaded_at: datetime
+    class Config:
+        from_attributes = True
+
+
+class ConnectionUpsert(BaseModel):
+    server_id: str
+    connection_id: str
+    device_type: str
+
+class ConnectionResponse(BaseModel):
+    user_id: int
+    server_id: str
+    connection_id: str
+    device_type: str
+    last_active: datetime
+    class Config:
+        from_attributes = True
