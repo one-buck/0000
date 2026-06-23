@@ -49,6 +49,7 @@ async def send_message(msg: MessageSend, db: AsyncSession = Depends(get_db)):
     try:
         await db.commit()
         await db.refresh(db_msg)
+        await search.index_message(db_msg)
         return db_msg
     except SQLAlchemyError as e:
         await db.rollback()
@@ -134,6 +135,7 @@ async def delete_message(message_id: int, user_id: int, db: AsyncSession = Depen
     msg.is_deleted = True
     try:
         await db.commit()
+        await search.delete_message_doc(message_id)
         return {"detail": "Message deleted"}
     except SQLAlchemyError as e:
         await db.rollback()

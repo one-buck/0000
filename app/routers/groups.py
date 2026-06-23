@@ -7,6 +7,7 @@ from typing import List
 from database import get_db, User, Group, GroupMember
 from schemas import GroupCreate, GroupUpdate, GroupResponse, MemberResponse
 from utils import get_entity_or_404
+import search
 
 router = APIRouter(prefix="/groups", tags=["Groups"])
 
@@ -21,6 +22,7 @@ async def create_group(group: GroupCreate, db: AsyncSession = Depends(get_db)):
     try:
         await db.commit()
         await db.refresh(db_group)
+        await search.index_group(db_group)
         return db_group
     except SQLAlchemyError as e:
         await db.rollback()
@@ -45,6 +47,7 @@ async def update_group(group_id: int, update_data: GroupUpdate, db: AsyncSession
     try:
         await db.commit()
         await db.refresh(group)
+        await search.index_group(group)
         return group
     except SQLAlchemyError as e:
         await db.rollback()
@@ -54,9 +57,11 @@ async def update_group(group_id: int, update_data: GroupUpdate, db: AsyncSession
 @router.delete("/{group_id}")
 async def delete_group(group_id: int, db: AsyncSession = Depends(get_db)):
     group = await get_entity_or_404(db, Group, group_id, "Group not found")
+    group_id_copy = group.id
     await db.delete(group)
     try:
         await db.commit()
+        await search.delete_group_doc(group_id_copy)
         return {"detail": "Group deleted successfully"}
     except SQLAlchemyError as e:
         await db.rollback()

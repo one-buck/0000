@@ -3,9 +3,11 @@ Quick reference for all API endpoints.
 Run with: python3 tests/test_endpoints.py
 Server must be running at http://127.0.0.1:8000
 MinIO must be running at http://localhost:9000
+Elasticsearch must be running at http://localhost:9200 (search section skipped if unavailable)
 """
 
 import io
+import time
 import requests
 
 BASE = "http://127.0.0.1:8000"
@@ -302,6 +304,69 @@ show("Delete bob's connection", resp)
 
 resp = requests.delete(f"{BASE}/connections/{bob_id}")
 show("Delete bob's connection again (expect 404)", resp)
+
+
+# ─────────────────────────────────────────────────
+# SEARCH  (skipped automatically if ES is down)
+# ─────────────────────────────────────────────────
+
+section("SEARCH")
+
+es_available = requests.get(f"{BASE}/search/messages?q=test").status_code != 503
+
+if not es_available:
+    print("\n  [SKIPPED] Elasticsearch is not running — all search calls would return 503")
+else:
+    # ES needs a moment to make the indexed docs searchable
+    time.sleep(1)
+
+    # Search messages by content
+    resp = requests.get(f"{BASE}/search/messages", params={"q": "how are you"})
+    show("Search messages: 'how are you'", resp)
+
+    # Fuzzy match (typo)
+    resp = requests.get(f"{BASE}/search/messages", params={"q": "helo"})
+    show("Search messages fuzzy: 'helo'", resp)
+
+    # Filter by sender
+    resp = requests.get(f"{BASE}/search/messages", params={"q": "hello", "sender_id": alice_id})
+    show(f"Search messages from alice (id={alice_id})", resp)
+
+    # Filter by receiver
+    resp = requests.get(f"{BASE}/search/messages", params={"q": "hello", "receiver_id": bob_id})
+    show(f"Search messages to bob (id={bob_id})", resp)
+
+    # Filter by group receiver
+    resp = requests.get(f"{BASE}/search/messages", params={"q": "team", "receiver_id": group_id})
+    show(f"Search group messages (group_id={group_id})", resp)
+
+    # Paginate
+    resp = requests.get(f"{BASE}/search/messages", params={"q": "hello", "skip": 0, "limit": 1})
+    show("Search messages (limit=1)", resp)
+
+    # No results
+    resp = requests.get(f"{BASE}/search/messages", params={"q": "xyzzy_no_match_zzzz"})
+    show("Search messages: no results", resp)
+
+    # Search groups by name
+    resp = requests.get(f"{BASE}/search/groups", params={"q": "alpha"})
+    show("Search groups: 'alpha'", resp)
+
+    # Fuzzy group search
+    resp = requests.get(f"{BASE}/search/groups", params={"q": "teem"})
+    show("Search groups fuzzy: 'teem'", resp)
+
+    # Paginate group search
+    resp = requests.get(f"{BASE}/search/groups", params={"q": "team", "skip": 0, "limit": 1})
+    show("Search groups (limit=1)", resp)
+
+    # No results
+    resp = requests.get(f"{BASE}/search/groups", params={"q": "xyzzy_no_match_zzzz"})
+    show("Search groups: no results", resp)
+
+    # Missing q param — expect 422
+    resp = requests.get(f"{BASE}/search/messages")
+    show("Missing q param (expect 422)", resp)
 
 
 # ─────────────────────────────────────────────────

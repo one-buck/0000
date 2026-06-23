@@ -8,8 +8,8 @@ Interactive docs: `http://127.0.0.1:8000/docs`
 ## Setup
 
 ```bash
-# Start the database + object storage
-docker compose --env-file .env up -d postgres minio
+# Start all backing services
+docker compose --env-file .env up -d postgres minio elasticsearch
 
 # Run the server
 source venv/bin/activate
@@ -467,6 +467,8 @@ Media must be uploaded before being attached to a message. The upload returns a 
 | `file` | `application/pdf`, `application/zip`, `text/plain`, Word docs, `application/octet-stream` | 50 MB |
 
 Files are stored in MinIO under `chat-media/{kind}/{uuid}.{ext}` and served via a public URL.
+
+> **Tip:** Upload first, then include the returned `url` as `media_url` when calling `POST /messages/`.
 
 ---
 

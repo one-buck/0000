@@ -65,16 +65,25 @@ async def ensure_indices() -> None:
 
 
 async def _es_or_503(coro):
+    """For search queries — fail loudly if ES is down."""
     try:
         return await coro
     except ESConnectionError:
         raise HTTPException(status_code=503, detail="Search service unavailable")
 
 
+async def _es_silent(coro):
+    """For background indexing — swallow errors so the main operation always succeeds."""
+    try:
+        await coro
+    except Exception:
+        pass
+
+
 # ── Messages ──────────────────────────────────────────────────────────────────
 
 async def index_message(msg) -> None:
-    await _es_or_503(get_client().index(
+    await _es_silent(get_client().index(
         index=MESSAGE_INDEX,
         id=str(msg.id),
         document={
@@ -125,7 +134,7 @@ async def search_messages(
 # ── Groups ────────────────────────────────────────────────────────────────────
 
 async def index_group(group) -> None:
-    await _es_or_503(get_client().index(
+    await _es_silent(get_client().index(
         index=GROUP_INDEX,
         id=str(group.id),
         document={
