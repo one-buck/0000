@@ -1,0 +1,32 @@
+<!-- ═══════════════════════════════════════════
+     VIEW: INFO  (contact or group)
+     Shown when the user taps the header or info
+     icon inside an open chat.
+
+     Content is injected dynamically by openInfo()
+     in app.js — the #info-content and #info-footer
+     divs are cleared and rebuilt each time.
+
+     For groups, a "Leave Group" button is appended
+     to #info-footer and calls leaveGroup().
+
+     IDs used by app.js:
+       #btn-back-info, #info-title,
+       #info-content, #info-footer
+     ═══════════════════════════════════════════ -->
+<div class="panel-view" id="view-info">
+
+  <div class="panel-header">
+    <button class="icon-btn" id="btn-back-info">
+      <i data-lucide="arrow-left"></i>
+    </button>
+    <span class="panel-header-name" id="info-title">Info</span>
+  </div>
+
+  <!-- Filled by openInfo() -->
+  <div class="settings-scroll" id="info-content"></div>
+
+  <!-- Leave Group button injected here for groups -->
+  <div style="padding:16px;background:var(--white);border-top:var(--border);" id="info-footer"></div>
+
+</div>

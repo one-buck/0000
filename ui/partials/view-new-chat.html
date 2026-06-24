@@ -1,0 +1,40 @@
+<!-- ═══════════════════════════════════════════
+     VIEW: NEW CHAT
+     Contact picker shown when the user taps the
+     compose button (btn-new-chat) in the sidebar.
+
+     The contact list (#contact-list) is populated
+     by renderContactList() in app.js.
+
+     Tapping a contact calls openChatFromContact().
+     Tapping "New Group" navigates to view-group-create.
+
+     IDs used by app.js:
+       #btn-back-new-chat, #contact-search,
+       #btn-new-group, #contact-list
+     ═══════════════════════════════════════════ -->
+<div class="panel-view" id="view-new-chat">
+
+  <div class="panel-header">
+    <button class="icon-btn" id="btn-back-new-chat">
+      <i data-lucide="arrow-left"></i>
+    </button>
+    <span class="panel-header-name">New Chat</span>
+  </div>
+
+  <div class="panel-search">
+    <div class="search-wrap">
+      <span class="search-icon"><i data-lucide="search"></i></span>
+      <input class="search-input" id="contact-search" placeholder="Search contacts…">
+    </div>
+  </div>
+
+  <div class="list-action" id="btn-new-group">
+    <i data-lucide="users"></i>
+    New Group
+  </div>
+
+  <!-- Populated dynamically by renderContactList() -->
+  <div class="panel-list" id="contact-list"></div>
+
+</div>

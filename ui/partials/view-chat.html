@@ -1,0 +1,100 @@
+<!-- ═══════════════════════════════════════════
+     VIEW: CHAT
+     Main messaging panel. Shown when a conversation
+     is opened via openChat(convId) in app.js.
+
+     Sections:
+       • panel-header  — contact info + call buttons
+       • chat-messages — message list (rendered by renderChat())
+       • emoji-picker  — toggled by btn-emoji
+       • attach-menu   — toggled by btn-attach
+       • chat-input-bar — text input + send + mic + recording UI
+
+     IDs used by app.js:
+       #chat-header-info, #chat-avatar, #chat-status-dot,
+       #chat-name, #chat-status-text,
+       #btn-voice-call, #btn-video-call, #btn-chat-info,
+       #chat-messages,
+       #emoji-picker, #emoji-grid,
+       #attach-menu, #attach-photo, #attach-video, #attach-document,
+       #btn-attach, #msg-input, #btn-emoji, #btn-mic,
+       #rec-indicator, #rec-time-display, #rec-wave, #btn-cancel-rec,
+       #send-btn
+     ═══════════════════════════════════════════ -->
+<div class="panel-view" id="view-chat">
+
+  <!-- Header -->
+  <div class="panel-header">
+    <div class="panel-header-info" id="chat-header-info">
+      <div class="avatar-wrap">
+        <div class="avatar avatar-36" id="chat-avatar"></div>
+        <span class="status-dot sm" id="chat-status-dot"></span>
+      </div>
+      <div>
+        <div class="panel-header-name" id="chat-name">Alice Morgan</div>
+        <div class="panel-header-status" id="chat-status-text">online</div>
+      </div>
+    </div>
+    <div class="panel-header-actions">
+      <button class="icon-btn" id="btn-voice-call" title="Voice call">
+        <i data-lucide="phone"></i>
+      </button>
+      <button class="icon-btn" id="btn-video-call" title="Video call">
+        <i data-lucide="video"></i>
+      </button>
+      <button class="icon-btn" id="btn-chat-info" title="Info">
+        <i data-lucide="info"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Message list (filled by renderChat()) -->
+  <div class="chat-messages" id="chat-messages"></div>
+
+  <!-- Emoji Picker (toggled above input bar) -->
+  <div class="emoji-picker" id="emoji-picker">
+    <div class="emoji-picker-header">Emoji</div>
+    <div class="emoji-grid" id="emoji-grid"></div>
+  </div>
+
+  <!-- Attachment Menu -->
+  <div class="attach-menu" id="attach-menu">
+    <div class="attach-option" id="attach-photo">
+      <i data-lucide="image"></i> Photo
+    </div>
+    <div class="attach-option" id="attach-video">
+      <i data-lucide="video"></i> Video
+    </div>
+    <div class="attach-option" id="attach-document">
+      <i data-lucide="file-text"></i> Document
+    </div>
+  </div>
+
+  <!-- Input Bar -->
+  <div class="chat-input-bar">
+    <button class="icon-btn" id="btn-attach" title="Attach">
+      <i data-lucide="paperclip"></i>
+    </button>
+    <input class="chat-input" id="msg-input" placeholder="Message…" autocomplete="off">
+    <button class="icon-btn" id="btn-emoji" title="Emoji">
+      <i data-lucide="smile"></i>
+    </button>
+    <!-- Mic: visible only when input is empty -->
+    <button class="icon-btn hidden" id="btn-mic" title="Hold to record">
+      <i data-lucide="mic"></i>
+    </button>
+    <!-- Recording UI: replaces input row while recording -->
+    <div class="recording-indicator" id="rec-indicator">
+      <div class="rec-dot"></div>
+      <span class="rec-time" id="rec-time-display">0:00</span>
+      <div class="rec-wave" id="rec-wave"></div>
+      <button class="icon-btn" id="btn-cancel-rec" title="Cancel" style="width:28px;height:28px;">
+        <i data-lucide="x" style="width:14px;height:14px;"></i>
+      </button>
+    </div>
+    <button class="send-btn disabled" id="send-btn" title="Send">
+      <i data-lucide="send" style="width:16px;height:16px;stroke:white;fill:none;stroke-width:2;margin-left:2px;"></i>
+    </button>
+  </div>
+
+</div>

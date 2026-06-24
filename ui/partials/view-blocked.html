@@ -1,0 +1,26 @@
+<!-- ═══════════════════════════════════════════
+     VIEW: BLOCKED CONTACTS
+     Reached from Settings → Blocked Contacts.
+     Currently static (no blocked contacts state).
+     To add dynamic blocked list: populate
+     #blocked-list from state in app.js.
+
+     IDs used by app.js:
+       #btn-back-blocked
+     ═══════════════════════════════════════════ -->
+<div class="panel-view" id="view-blocked">
+
+  <div class="panel-header">
+    <button class="icon-btn" id="btn-back-blocked">
+      <i data-lucide="arrow-left"></i>
+    </button>
+    <span class="panel-header-name">Blocked Contacts</span>
+  </div>
+
+  <div class="empty-state">
+    <i data-lucide="user-x" style="width:52px;height:52px;stroke:#d4d4d4;fill:none;stroke-width:1;"></i>
+    <div class="empty-state-title">No blocked contacts</div>
+    <div class="empty-state-sub">Blocked users won't be able to message you</div>
+  </div>
+
+</div>

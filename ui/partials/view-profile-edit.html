@@ -1,0 +1,36 @@
+<!-- ═══════════════════════════════════════════
+     VIEW: EDIT PROFILE
+     Reached from Settings profile card or sidebar
+     avatar click. Pre-filled by populateProfileEdit()
+     in app.js. Saved by saveProfile().
+
+     IDs used by app.js:
+       #btn-back-profile-edit,
+       #edit-name, #edit-status, #btn-save-profile
+     ═══════════════════════════════════════════ -->
+<div class="panel-view" id="view-profile-edit">
+
+  <div class="panel-header">
+    <button class="icon-btn" id="btn-back-profile-edit">
+      <i data-lucide="arrow-left"></i>
+    </button>
+    <span class="panel-header-name">Edit Profile</span>
+  </div>
+
+  <div class="empty-state" style="justify-content:flex-start;padding-top:48px;gap:20px;">
+    <div class="photo-placeholder">
+      <i data-lucide="camera" style="width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.6;"></i>
+      <span>Change photo</span>
+    </div>
+    <div class="overlay-field" style="width:300px;">
+      <label>Name</label>
+      <input class="input" type="text" id="edit-name" placeholder="Your name">
+    </div>
+    <div class="overlay-field" style="width:300px;">
+      <label>Status</label>
+      <input class="input" type="text" id="edit-status" placeholder="Your status">
+    </div>
+    <button class="btn btn-full" style="width:300px;" id="btn-save-profile">Save Changes</button>
+  </div>
+
+</div>

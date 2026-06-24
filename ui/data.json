@@ -1,109 +1,83 @@
 {
   "contacts": [
-    { "id": 1, "name": "Alice", "initial": "A" },
-    { "id": 2, "name": "Bob", "initial": "B" },
-    { "id": 3, "name": "Charlie", "initial": "C" },
-    { "id": 4, "name": "Diana", "initial": "D" },
-    { "id": 5, "name": "Eve", "initial": "E" },
-    { "id": 6, "name": "Frank", "initial": "F" },
-    { "id": 7, "name": "Grace", "initial": "G" },
-    { "id": 8, "name": "Henry", "initial": "H" },
-    { "id": 9, "name": "Iris", "initial": "I" },
-    { "id": 10, "name": "Jack", "initial": "J" }
+    { "id": 1, "name": "Alice Morgan",   "initial": "A", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Alice&backgroundColor=b6e3f4",    "status": "online",  "statusText": "At the office" },
+    { "id": 2, "name": "Bob Carter",     "initial": "B", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Bob&backgroundColor=ffd5dc",      "status": "online",  "statusText": "Working from home" },
+    { "id": 3, "name": "Charlie Davis",  "initial": "C", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Charlie&backgroundColor=c0aede",  "status": "away",    "statusText": "In a meeting" },
+    { "id": 4, "name": "Diana Reeves",   "initial": "D", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Diana&backgroundColor=d1f4cc",    "status": "online",  "statusText": "Available" },
+    { "id": 5, "name": "Eve Santos",     "initial": "E", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Eve&backgroundColor=ffd5dc",      "status": "offline", "statusText": "Last seen 2h ago" },
+    { "id": 6, "name": "Frank Lee",      "initial": "F", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Frank&backgroundColor=b6e3f4",    "status": "online",  "statusText": "Available" },
+    { "id": 7, "name": "Grace Kim",      "initial": "G", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Grace&backgroundColor=ffdfbf",    "status": "away",    "statusText": "Busy" },
+    { "id": 8, "name": "Henry Brooks",   "initial": "H", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Henry&backgroundColor=c0aede",    "status": "offline", "statusText": "Last seen yesterday" },
+    { "id": 9, "name": "Iris Chen",      "initial": "I", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Iris&backgroundColor=d1f4cc",     "status": "online",  "statusText": "On a call" },
+    { "id": 10,"name": "Jack Wilson",    "initial": "J", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Jack&backgroundColor=ffdfbf",     "status": "offline", "statusText": "Last seen 3d ago" }
   ],
   "conversations": [
     {
-      "id": 1,
-      "type": "individual",
-      "contactId": 1,
-      "unread": 3,
+      "id": 1, "type": "individual", "contactId": 1, "unread": 3,
       "messages": [
-        { "from": "them", "text": "Hey, how are you?", "time": "9:15 AM" },
-        { "from": "me", "text": "Doing well! Just finishing up some work.", "time": "9:18 AM" },
+        { "from": "them", "text": "Hey! Are you free for a quick catch-up today?", "time": "9:15 AM" },
+        { "from": "me",   "text": "Doing well! Just finishing up some work.", "time": "9:18 AM" },
         { "from": "them", "text": "Nice! Are you free later today?", "time": "9:20 AM" },
         { "from": "them", "type": "media", "mediaType": "Photo", "time": "9:21 AM" },
-        { "from": "them", "text": "Check out this place", "time": "9:21 AM" },
-        { "from": "me", "type": "voice", "duration": "0:12", "time": "9:25 AM" }
+        { "from": "them", "text": "Check out this place — we should go!", "time": "9:21 AM" },
+        { "from": "me",   "type": "voice", "duration": "0:12", "time": "9:25 AM" }
       ]
     },
     {
-      "id": 2,
-      "type": "individual",
-      "contactId": 2,
-      "unread": 0,
+      "id": 2, "type": "individual", "contactId": 2, "unread": 0,
       "messages": [
-        { "from": "me", "text": "Did you see the email?", "time": "8:30 AM" },
-        { "from": "them", "text": "Yeah, I replied already.", "time": "8:45 AM" },
-        { "from": "me", "text": "Great, thanks!", "time": "8:46 AM" }
+        { "from": "me",   "text": "Did you see the email from the client?", "time": "8:30 AM" },
+        { "from": "them", "text": "Yeah, I replied already. Should be sorted.", "time": "8:45 AM" },
+        { "from": "me",   "text": "Great, thanks Bob!", "time": "8:46 AM" }
       ]
     },
     {
-      "id": 3,
-      "type": "group",
-      "name": "Project Team",
-      "participants": [1, 2, 3],
-      "unread": 12,
+      "id": 3, "type": "group", "name": "Project Team", "participants": [1, 2, 3], "unread": 12,
       "messages": [
-        { "from": "Alice", "text": "Meeting at 3pm?", "time": "8:00 AM" },
-        { "from": "Bob", "text": "Works for me", "time": "8:05 AM" },
-        { "from": "Charlie", "text": "I'll be 5 min late", "time": "8:10 AM" },
-        { "from": "me", "text": "See you all there", "time": "8:12 AM" },
-        { "from": "Alice", "text": "Please review the doc before we meet", "time": "8:30 AM" },
-        { "from": "Alice", "type": "media", "mediaType": "Document", "time": "8:30 AM" }
+        { "from": "Alice Morgan",  "text": "Meeting at 3pm today?", "time": "8:00 AM" },
+        { "from": "Bob Carter",    "text": "Works for me 👍", "time": "8:05 AM" },
+        { "from": "Charlie Davis", "text": "I'll be 5 min late", "time": "8:10 AM" },
+        { "from": "me",            "text": "See you all there", "time": "8:12 AM" },
+        { "from": "Alice Morgan",  "text": "Please review the doc before we meet", "time": "8:30 AM" },
+        { "from": "Alice Morgan",  "type": "media", "mediaType": "Document", "time": "8:30 AM" }
       ]
     },
     {
-      "id": 4,
-      "type": "individual",
-      "contactId": 4,
-      "unread": 1,
+      "id": 4, "type": "individual", "contactId": 4, "unread": 1,
       "messages": [
-        { "from": "them", "text": "Happy birthday!", "time": "Yesterday" },
-        { "from": "me", "text": "Thank you so much!", "time": "Yesterday" },
-        { "from": "them", "text": "Let's catch up soon", "time": "9:00 AM" }
+        { "from": "them", "text": "Happy birthday! 🎉🎂", "time": "Yesterday" },
+        { "from": "me",   "text": "Thank you so much Diana!", "time": "Yesterday" },
+        { "from": "them", "text": "Let's catch up soon — coffee?", "time": "9:00 AM" }
       ]
     },
     {
-      "id": 5,
-      "type": "individual",
-      "contactId": 5,
-      "unread": 0,
+      "id": 5, "type": "individual", "contactId": 5, "unread": 0,
       "messages": [
-        { "from": "me", "text": "Got the files, thanks!", "time": "Monday" },
-        { "from": "them", "text": "No problem", "time": "Monday" }
+        { "from": "me",   "text": "Got the files, thanks for sending!", "time": "Monday" },
+        { "from": "them", "text": "No problem, anytime 😊", "time": "Monday" }
       ]
     },
     {
-      "id": 6,
-      "type": "group",
-      "name": "Weekend Plans",
-      "participants": [4, 5, 6],
-      "unread": 5,
+      "id": 6, "type": "group", "name": "Weekend Plans", "participants": [4, 5, 6], "unread": 5,
       "messages": [
-        { "from": "Diana", "text": "Who's in for Saturday?", "time": "7:30 PM" },
-        { "from": "Eve", "text": "Count me in!", "time": "7:35 PM" },
-        { "from": "Frank", "text": "What are we doing?", "time": "7:40 PM" },
-        { "from": "Diana", "text": "Thinking hiking or beach", "time": "7:42 PM" },
-        { "from": "me", "text": "Beach sounds great", "time": "7:50 PM" }
+        { "from": "Diana Reeves", "text": "Who's in for Saturday?", "time": "7:30 PM" },
+        { "from": "Eve Santos",   "text": "Count me in!", "time": "7:35 PM" },
+        { "from": "Frank Lee",    "text": "What are we doing exactly?", "time": "7:40 PM" },
+        { "from": "Diana Reeves", "text": "Thinking hiking or beach 🏖️", "time": "7:42 PM" },
+        { "from": "me",           "text": "Beach sounds amazing!", "time": "7:50 PM" }
       ]
     },
     {
-      "id": 7,
-      "type": "individual",
-      "contactId": 7,
-      "unread": 0,
+      "id": 7, "type": "individual", "contactId": 7, "unread": 0,
       "messages": [
-        { "from": "them", "text": "Can you send me that link?", "time": "Sunday" },
-        { "from": "me", "text": "Sure, here it is: example.com", "time": "Sunday" }
+        { "from": "them", "text": "Can you send me that design link?", "time": "Sunday" },
+        { "from": "me",   "text": "Sure, here it is: figma.com/example", "time": "Sunday" }
       ]
     },
     {
-      "id": 8,
-      "type": "individual",
-      "contactId": 8,
-      "unread": 0,
+      "id": 8, "type": "individual", "contactId": 8, "unread": 0,
       "messages": [
-        { "from": "me", "text": "See you tomorrow", "time": "Last week" },
+        { "from": "me",   "text": "See you tomorrow at 10!", "time": "Last week" },
         { "from": "them", "text": "Looking forward to it!", "time": "Last week" }
       ]
     }

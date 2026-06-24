@@ -1,0 +1,99 @@
+<!-- ═══════════════════════════════════════════
+     VIEW: SETTINGS
+     Shown via btn-settings in the sidebar.
+     All toggle items use [data-toggle] attribute —
+     click is bound globally in bindEvents().
+
+     Sections: Privacy · Notifications · Storage · Account
+
+     IDs used by app.js:
+       #btn-back-settings, #settings-profile-card,
+       #settings-avatar, #settings-name, #settings-status,
+       #btn-blocked, #btn-logout
+     ═══════════════════════════════════════════ -->
+<div class="panel-view" id="view-settings">
+
+  <div class="panel-header">
+    <button class="icon-btn" id="btn-back-settings">
+      <i data-lucide="arrow-left"></i>
+    </button>
+    <span class="panel-header-name">Settings</span>
+  </div>
+
+  <div class="settings-scroll">
+
+    <!-- Profile card — tappable, goes to view-profile-edit -->
+    <div class="settings-section" id="settings-profile-card">
+      <div class="settings-profile">
+        <div class="avatar avatar-46" id="settings-avatar"></div>
+        <div>
+          <div class="settings-name" id="settings-name">You</div>
+          <div class="settings-status-text" id="settings-status">Available</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Privacy -->
+    <div class="section-label">Privacy</div>
+    <div class="settings-item">
+      <i data-lucide="eye" style="width:17px;height:17px;stroke:var(--gray-400);fill:none;stroke-width:1.8;flex-shrink:0;"></i>
+      <span class="settings-label">Last Seen</span>
+      <span class="settings-value">Everyone</span>
+    </div>
+    <div class="settings-item">
+      <i data-lucide="check-check" style="width:17px;height:17px;stroke:var(--gray-400);fill:none;stroke-width:1.8;flex-shrink:0;"></i>
+      <span class="settings-label">Read Receipts</span>
+      <div class="toggle on" data-toggle></div>
+    </div>
+    <div class="settings-item" id="btn-blocked">
+      <i data-lucide="slash" style="width:17px;height:17px;stroke:var(--gray-400);fill:none;stroke-width:1.8;flex-shrink:0;"></i>
+      <span class="settings-label">Blocked Contacts</span>
+      <i data-lucide="chevron-right" style="width:15px;height:15px;stroke:var(--gray-300);fill:none;stroke-width:2;"></i>
+    </div>
+
+    <!-- Notifications -->
+    <div class="section-label">Notifications</div>
+    <div class="settings-item">
+      <i data-lucide="bell" style="width:17px;height:17px;stroke:var(--gray-400);fill:none;stroke-width:1.8;flex-shrink:0;"></i>
+      <span class="settings-label">Message Notifications</span>
+      <div class="toggle on" data-toggle></div>
+    </div>
+    <div class="settings-item">
+      <i data-lucide="layout-template" style="width:17px;height:17px;stroke:var(--gray-400);fill:none;stroke-width:1.8;flex-shrink:0;"></i>
+      <span class="settings-label">Show Preview</span>
+      <div class="toggle on" data-toggle></div>
+    </div>
+    <div class="settings-item">
+      <i data-lucide="volume-2" style="width:17px;height:17px;stroke:var(--gray-400);fill:none;stroke-width:1.8;flex-shrink:0;"></i>
+      <span class="settings-label">Sound</span>
+      <div class="toggle on" data-toggle></div>
+    </div>
+
+    <!-- Storage & Data -->
+    <div class="section-label">Storage & Data</div>
+    <div class="settings-item">
+      <i data-lucide="download-cloud" style="width:17px;height:17px;stroke:var(--gray-400);fill:none;stroke-width:1.8;flex-shrink:0;"></i>
+      <span class="settings-label">Media Auto-Download</span>
+      <div class="toggle" data-toggle></div>
+    </div>
+    <div class="settings-item">
+      <i data-lucide="hard-drive" style="width:17px;height:17px;stroke:var(--gray-400);fill:none;stroke-width:1.8;flex-shrink:0;"></i>
+      <span class="settings-label">Storage Used</span>
+      <span class="settings-value">1.2 GB</span>
+    </div>
+    <div class="settings-item">
+      <i data-lucide="activity" style="width:17px;height:17px;stroke:var(--gray-400);fill:none;stroke-width:1.8;flex-shrink:0;"></i>
+      <span class="settings-label">Network Usage</span>
+      <span class="settings-value">348 MB this month</span>
+    </div>
+
+    <!-- Account -->
+    <div class="section-label">Account</div>
+    <div class="settings-item" id="btn-logout">
+      <i data-lucide="log-out" style="width:17px;height:17px;stroke:#dc2626;fill:none;stroke-width:1.8;flex-shrink:0;"></i>
+      <span class="settings-label" style="color:#dc2626;font-weight:600;">Log Out</span>
+    </div>
+    <div style="height:32px;"></div>
+
+  </div>
+</div>

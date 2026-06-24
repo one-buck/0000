@@ -1,0 +1,76 @@
+<!-- ═══════════════════════════════════════════
+     VIEWS: GROUP CREATE  +  GROUP NAME
+     Two-step group creation flow:
+       1. view-group-create  — pick participants
+       2. view-group-name    — set name & description
+
+     Step 1 list is populated by renderGroupContactList().
+     Completing step 2 calls createGroup() in app.js.
+
+     IDs used by app.js:
+       Step 1:
+         #btn-back-group-create, #group-search,
+         #group-contact-list, #group-selected-bar,
+         #group-selected-count, #btn-group-next
+       Step 2:
+         #btn-back-group-name, #group-name-input,
+         #group-desc-input, #btn-create-group
+     ═══════════════════════════════════════════ -->
+
+<!-- Step 1 — Pick participants -->
+<div class="panel-view" id="view-group-create">
+
+  <div class="panel-header">
+    <button class="icon-btn" id="btn-back-group-create">
+      <i data-lucide="arrow-left"></i>
+    </button>
+    <span class="panel-header-name">Add Participants</span>
+  </div>
+
+  <div class="panel-search">
+    <div class="search-wrap">
+      <span class="search-icon"><i data-lucide="search"></i></span>
+      <input class="search-input" id="group-search" placeholder="Search contacts…">
+    </div>
+  </div>
+
+  <!-- Populated dynamically by renderGroupContactList() -->
+  <div class="panel-list" id="group-contact-list"></div>
+
+  <!-- Shown only when ≥1 contact is selected -->
+  <div class="selected-bar" id="group-selected-bar">
+    <span id="group-selected-count" style="font-size:13px;font-weight:600;color:var(--gray-600);">0 selected</span>
+    <button class="btn btn-sm" id="btn-group-next">
+      Next <i data-lucide="arrow-right" style="width:14px;height:14px;stroke:white;fill:none;stroke-width:2;"></i>
+    </button>
+  </div>
+
+</div>
+
+<!-- Step 2 — Name & description -->
+<div class="panel-view" id="view-group-name">
+
+  <div class="panel-header">
+    <button class="icon-btn" id="btn-back-group-name">
+      <i data-lucide="arrow-left"></i>
+    </button>
+    <span class="panel-header-name">Group Details</span>
+  </div>
+
+  <div class="empty-state" style="justify-content:flex-start;padding-top:48px;gap:20px;">
+    <div class="photo-placeholder">
+      <i data-lucide="camera" style="width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.6;"></i>
+      <span>Group icon</span>
+    </div>
+    <div class="overlay-field" style="width:280px;">
+      <label>Group Name</label>
+      <input class="input" type="text" id="group-name-input" placeholder="e.g. Project Team">
+    </div>
+    <div class="overlay-field" style="width:280px;">
+      <label>Description (optional)</label>
+      <input class="input" type="text" id="group-desc-input" placeholder="What's this group about?">
+    </div>
+    <button class="btn btn-full" style="width:280px;" id="btn-create-group">Create Group</button>
+  </div>
+
+</div>

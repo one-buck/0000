@@ -1,0 +1,42 @@
+<!-- ═══════════════════════════════════════════
+     SIDEBAR
+     Fixed-width left column (320px).
+     Contains: user avatar, title, action buttons,
+               search bar, and the chat list.
+
+     The chat list (#chat-list) is populated by
+     renderChatList() in app.js — do not add
+     static items here.
+
+     IDs used by app.js:
+       #sidebar-user, #sidebar-avatar-img,
+       #sidebar-avatar-letter, #btn-new-chat,
+       #btn-settings, #chat-search, #chat-list
+     ═══════════════════════════════════════════ -->
+<aside class="sidebar">
+
+  <div class="sidebar-header">
+    <div class="sidebar-user" id="sidebar-user" title="Your profile">
+      <img id="sidebar-avatar-img" src="" alt="" style="display:none;">
+      <span id="sidebar-avatar-letter">Y</span>
+    </div>
+    <span class="sidebar-title">Messages</span>
+    <button class="icon-btn" id="btn-new-chat" title="New chat">
+      <i data-lucide="edit-3"></i>
+    </button>
+    <button class="icon-btn" id="btn-settings" title="Settings">
+      <i data-lucide="settings"></i>
+    </button>
+  </div>
+
+  <div class="sidebar-search">
+    <div class="search-wrap">
+      <span class="search-icon"><i data-lucide="search"></i></span>
+      <input class="search-input" id="chat-search" placeholder="Search…">
+    </div>
+  </div>
+
+  <!-- Populated dynamically by renderChatList() -->
+  <div class="sidebar-list" id="chat-list"></div>
+
+</aside>

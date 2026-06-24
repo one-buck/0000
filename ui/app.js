@@ -8,6 +8,7 @@ const state = {
   selectedGroupContacts: [],
   userName: 'You',
   userStatus: 'Available',
+  userAvatar: '',
   callTimer: null,
   callSeconds: 0,
   callType: 'voice',
@@ -16,9 +17,6 @@ const state = {
   toastTimer: null,
 };
 
-/* ════════════════════════════════════════════
-   DOM References
-   ════════════════════════════════════════════ */
 const $ = (id) => document.getElementById(id);
 
 /* ════════════════════════════════════════════
@@ -36,50 +34,64 @@ async function loadData() {
     const card = $('overlay-login').querySelector('.overlay-card');
     card.innerHTML = `
       <div class="error-state">
-        <div style="font-weight:bold;font-size:14px;margin-bottom:12px;">Failed to load data</div>
+        <div style="font-weight:700;font-size:15px;margin-bottom:12px;">Failed to load data</div>
         <p>Could not fetch <code>data.json</code>.</p>
-        <p style="margin-top:8px;">Serve these files with a local server:</p>
+        <p style="margin-top:8px;">Serve with a local server:</p>
         <p><code>python -m http.server</code></p>
-        <p style="margin-top:8px;">or use VS Code Live Server extension.</p>
-        <p style="margin-top:12px;color:#aaa;">Error: ${err.message}</p>
-      </div>
-    `;
+        <p style="margin-top:12px;color:#aaa;font-size:11px;">Error: ${err.message}</p>
+      </div>`;
   }
 }
 
 /* ════════════════════════════════════════════
-   Initialization
+   Init
    ════════════════════════════════════════════ */
 function init() {
   bindEvents();
   initEmojiPicker();
+  lucide.createIcons();
+}
+
+/* ════════════════════════════════════════════
+   Avatar helpers
+   ════════════════════════════════════════════ */
+function contactById(id) {
+  return state.contacts.find(c => c.id === id);
+}
+
+function setAvatar(el, src, fallbackLetter) {
+  el.innerHTML = '';
+  if (src) {
+    const img = document.createElement('img');
+    img.src = src;
+    img.alt = fallbackLetter;
+    img.onerror = () => { el.innerHTML = ''; el.textContent = fallbackLetter; };
+    el.appendChild(img);
+  } else {
+    el.textContent = fallbackLetter;
+  }
 }
 
 /* ════════════════════════════════════════════
    Event Binding
    ════════════════════════════════════════════ */
 function bindEvents() {
-
-  /* ── Login flow ── */
+  /* ── Login ── */
   $('btn-send-code').addEventListener('click', () => {
     const phone = $('phone-input').value.trim();
     if (!phone) return;
     $('verify-phone-display').textContent = phone;
     showOverlay('overlay-verify');
   });
-
   $('btn-verify-back').addEventListener('click', () => showOverlay('overlay-login'));
-
   $('btn-verify').addEventListener('click', () => {
     if ($('code-input').value.trim().length < 4) return;
     showOverlay('overlay-profile');
   });
-
   $('resend-link').addEventListener('click', function () {
     this.textContent = 'Sent!';
     setTimeout(() => { this.textContent = 'Resend'; }, 2000);
   });
-
   $('btn-done-setup').addEventListener('click', () => {
     const name = $('name-input').value.trim();
     if (name) state.userName = name;
@@ -95,7 +107,7 @@ function bindEvents() {
 
   /* ── Chat ── */
   $('msg-input').addEventListener('input', onMsgInput);
-  $('msg-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') sendMessage(); });
+  $('msg-input').addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
   $('send-btn').addEventListener('click', sendMessage);
   $('btn-emoji').addEventListener('click', toggleEmojiPicker);
   $('btn-attach').addEventListener('click', toggleAttachMenu);
@@ -168,7 +180,7 @@ function bindEvents() {
     el.addEventListener('click', () => el.classList.toggle('on'));
   });
 
-  /* ── Close menus on outside click ── */
+  /* ── Close menus outside click ── */
   $('app').addEventListener('click', (e) => {
     if (!e.target.closest('#attach-menu') && !e.target.closest('#btn-attach')) closeAttachMenu();
     if (!e.target.closest('#emoji-picker') && !e.target.closest('#btn-emoji')) closeEmojiPicker();
@@ -180,16 +192,17 @@ function bindEvents() {
    ════════════════════════════════════════════ */
 function showOverlay(id) {
   document.querySelectorAll('.overlay').forEach(o => o.classList.add('hidden'));
-  if (id) {
-    const el = $(id);
-    if (el) el.classList.remove('hidden');
-  }
+  if (id) { const el = $(id); if (el) el.classList.remove('hidden'); }
 }
 
 function enterApp() {
   showOverlay(null);
   $('main-layout').classList.remove('hidden');
-  $('sidebar-user').textContent = state.userName[0].toUpperCase();
+  /* sidebar user avatar */
+  const letter = $('sidebar-avatar-letter');
+  const img    = $('sidebar-avatar-img');
+  letter.textContent = state.userName[0].toUpperCase();
+  img.style.display = 'none';
   renderChatList();
 }
 
@@ -199,9 +212,9 @@ function showView(id) {
   cancelRecording();
   document.querySelectorAll('.panel-view').forEach(v => v.classList.remove('active'));
   $(id).classList.add('active');
-
   if (id === 'view-new-chat') { $('contact-search').value = ''; renderContactList(); }
   if (id === 'view-chat' && state.currentChatId) renderChat();
+  lucide.createIcons();
 }
 
 /* ════════════════════════════════════════════
@@ -213,41 +226,48 @@ function renderChatList(filter = '') {
   let html = '';
 
   state.conversations.forEach(conv => {
-    let name, initial;
+    let name, avatarSrc, initial, statusClass;
     if (conv.type === 'individual') {
-      const c = state.contacts.find(ct => ct.id === conv.contactId);
+      const c = contactById(conv.contactId);
       if (!c) return;
-      name = c.name; initial = c.initial;
+      name = c.name; avatarSrc = c.avatar; initial = c.initial; statusClass = c.status;
     } else {
-      name = conv.name; initial = name[0];
+      name = conv.name; avatarSrc = ''; initial = name[0]; statusClass = '';
     }
     if (fl && !name.toLowerCase().includes(fl)) return;
 
     const last = conv.messages[conv.messages.length - 1];
     if (!last) return;
     let preview;
-    if (last.type === 'media') preview = '[' + last.mediaType + ']';
-    else if (last.type === 'voice') preview = '[Voice] ' + last.duration;
-    else preview = (last.from === 'me' ? 'You: ' : (conv.type === 'group' ? last.from + ': ' : '')) + last.text;
+    if (last.type === 'media') preview = `📎 ${last.mediaType}`;
+    else if (last.type === 'voice') preview = `🎤 Voice message · ${last.duration}`;
+    else preview = (last.from === 'me' ? 'You: ' : (conv.type === 'group' ? last.from.split(' ')[0] + ': ' : '')) + last.text;
 
     const isActive = conv.id === state.currentChatId;
+    const avatarContent = avatarSrc
+      ? `<img src="${avatarSrc}" alt="${initial}" onerror="this.style.display='none';this.nextSibling.style.display='flex'"><span style="display:none">${initial}</span>`
+      : `<span>${initial}</span>`;
 
     html += `
       <div class="chat-item${isActive ? ' active' : ''}" data-conv-id="${conv.id}">
-        <div class="avatar">${initial}</div>
-        <div class="chat-item-body">
-          <div class="chat-item-name">${name}${conv.type === 'group' ? ' (group)' : ''}</div>
-          <div class="chat-item-preview">${preview}</div>
+        <div class="avatar-wrap">
+          <div class="avatar avatar-46">${avatarContent}</div>
+          ${conv.type === 'individual' ? `<span class="status-dot ${statusClass}"></span>` : ''}
         </div>
-        <div class="chat-item-meta">
-          ${last.time}
-          ${conv.unread > 0 ? '<div class="unread-badge">' + conv.unread + '</div>' : ''}
+        <div class="chat-item-body">
+          <div class="chat-item-row">
+            <span class="chat-item-name">${name}</span>
+            <span class="chat-item-time">${last.time}</span>
+          </div>
+          <div class="chat-item-bottom">
+            <span class="chat-item-preview">${preview}</span>
+            ${conv.unread > 0 ? `<span class="unread-badge">${conv.unread}</span>` : ''}
+          </div>
         </div>
       </div>`;
   });
 
-  el.innerHTML = html;
-
+  el.innerHTML = html || '<div class="empty-state" style="padding-top:48px;"><span>No conversations yet</span></div>';
   el.querySelectorAll('.chat-item').forEach(item => {
     item.addEventListener('click', () => openChat(parseInt(item.dataset.convId)));
   });
@@ -262,16 +282,26 @@ function openChat(convId) {
   if (!conv) return;
   conv.unread = 0;
 
-  let name, initial;
+  let name, avatarSrc, initial, status, statusText;
   if (conv.type === 'individual') {
-    const c = state.contacts.find(ct => ct.id === conv.contactId);
-    name = c.name; initial = c.initial;
+    const c = contactById(conv.contactId);
+    name = c.name; avatarSrc = c.avatar; initial = c.initial;
+    status = c.status; statusText = c.statusText;
   } else {
-    name = conv.name; initial = name[0];
+    name = conv.name; avatarSrc = ''; initial = name[0];
+    status = ''; statusText = `${conv.participants.length + 1} members`;
   }
 
   $('chat-name').textContent = name;
-  $('chat-avatar').textContent = initial;
+  const avatarEl = $('chat-avatar');
+  setAvatar(avatarEl, avatarSrc, initial);
+
+  const dotEl = $('chat-status-dot');
+  dotEl.className = `status-dot sm ${status}`;
+
+  const statusEl = $('chat-status-text');
+  statusEl.textContent = statusText || 'offline';
+  statusEl.className = 'panel-header-status' + (status === 'online' ? ' is-online' : '');
 
   renderChatList($('chat-search').value);
   showView('view-chat');
@@ -283,39 +313,78 @@ function renderChat() {
   const el = $('chat-messages');
   let html = '';
 
-  conv.messages.forEach(msg => {
+  conv.messages.forEach((msg, i) => {
     const isSent = msg.from === 'me';
     const cls = isSent ? 'sent' : 'received';
 
+    /* date separator for first message */
+    if (i === 0) {
+      html += `<div class="msg-date-sep">Today</div>`;
+    }
+
+    /* avatar for received messages in group */
+    let senderAvatar = '';
+    if (!isSent && conv.type === 'group') {
+      const c = state.contacts.find(ct => ct.name === msg.from);
+      const avSrc = c ? c.avatar : '';
+      const avLetter = c ? c.initial : (msg.from || '?')[0];
+      senderAvatar = `
+        <div class="msg-avatar-col">
+          <div class="avatar avatar-32" style="border-radius:50%;">
+            ${avSrc ? `<img src="${avSrc}" alt="${avLetter}" onerror="this.style.display='none';this.nextSibling&&(this.nextSibling.style.display='')"><span style="display:none">${avLetter}</span>` : avLetter}
+          </div>
+        </div>`;
+    } else if (!isSent) {
+      /* individual received — show small avatar */
+      const c = conv.type === 'individual' ? contactById(conv.contactId) : null;
+      const avSrc = c ? c.avatar : '';
+      const avLetter = c ? c.initial : '?';
+      senderAvatar = `
+        <div class="msg-avatar-col">
+          <div class="avatar avatar-32" style="border-radius:50%;">
+            ${avSrc ? `<img src="${avSrc}" alt="${avLetter}" onerror="this.style.display='none';this.nextSibling&&(this.nextSibling.style.display='')"><span style="display:none">${avLetter}</span>` : avLetter}
+          </div>
+        </div>`;
+    }
+
     if (msg.type === 'media') {
+      const icon = msg.mediaType === 'Photo' ? 'image' : msg.mediaType === 'Video' ? 'video' : 'file-text';
       html += `
         <div class="msg-row ${cls}">
+          ${!isSent ? senderAvatar : ''}
           <div>
-            <div class="msg-media">[${msg.mediaType}]</div>
+            <div class="msg-media">
+              <i data-lucide="${icon}" style="width:28px;height:28px;stroke:currentColor;fill:none;stroke-width:1.5;"></i>
+              <span style="font-size:12px;">${msg.mediaType}</span>
+            </div>
             <div class="msg-time">${msg.time}</div>
           </div>
         </div>`;
     } else if (msg.type === 'voice') {
       let bars = '';
-      for (let i = 0; i < 24; i++) {
+      for (let j = 0; j < 28; j++) {
         bars += `<div class="voice-bar" style="height:${Math.floor(Math.random() * 14) + 4}px;"></div>`;
       }
       html += `
         <div class="msg-row ${cls}">
+          ${!isSent ? senderAvatar : ''}
           <div>
             <div class="msg-voice">
-              <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              <div class="voice-play">
+                <i data-lucide="play" style="width:12px;height:12px;stroke:white;fill:white;stroke-width:0;margin-left:2px;"></i>
+              </div>
               <div class="voice-bars">${bars}</div>
-              <span>${msg.duration}</span>
+              <span class="voice-dur">${msg.duration}</span>
             </div>
             <div class="msg-time">${msg.time}</div>
           </div>
         </div>`;
     } else {
       const sender = (!isSent && conv.type === 'group')
-        ? `<div class="msg-sender">${msg.from}</div>` : '';
+        ? `<div class="msg-sender">${msg.from.split(' ')[0]}</div>` : '';
       html += `
         <div class="msg-row ${cls}">
+          ${!isSent ? senderAvatar : ''}
           <div class="msg-bubble">
             ${sender}${msg.text}
             <div class="msg-time">${msg.time}</div>
@@ -325,11 +394,12 @@ function renderChat() {
   });
 
   el.innerHTML = html;
+  lucide.createIcons();
   requestAnimationFrame(() => { el.scrollTop = el.scrollHeight; });
 }
 
 /* ════════════════════════════════════════════
-   Send Message
+   Send
    ════════════════════════════════════════════ */
 function onMsgInput() {
   const hasText = $('msg-input').value.trim().length > 0;
@@ -347,27 +417,23 @@ function sendMessage() {
   onMsgInput();
   renderChat();
   renderChatList($('chat-search').value);
-
   if (conv.type === 'individual') {
     setTimeout(() => simulateReply(conv), 1500 + Math.random() * 2000);
   }
 }
 
 function simulateReply(conv) {
-  const replies = ['Got it!', 'Sure thing.', 'Sounds good!', 'Let me think about it.', 'OK!', 'Thanks!', 'Will do.', 'Hmm, maybe later.', 'Absolutely.', 'On it.'];
+  const replies = ['Got it! 👍', 'Sure thing.', 'Sounds good!', 'Let me think about it.', 'OK!', 'Thanks! 🙏', 'Will do.', 'Hmm, maybe later.', 'Absolutely.', 'On it!'];
   const reply = replies[Math.floor(Math.random() * replies.length)];
 
   if (state.currentChatId !== conv.id) {
     conv.unread = (conv.unread || 0) + 1;
-    const c = state.contacts.find(ct => ct.id === conv.contactId);
-    if (c) showToast(c.name, reply);
+    const c = contactById(conv.contactId);
+    if (c) showToast(c, reply);
   }
 
   conv.messages.push({ from: 'them', text: reply, time: nowTime() });
-
-  if (state.currentChatId === conv.id) {
-    renderChat();
-  }
+  if (state.currentChatId === conv.id) renderChat();
   renderChatList($('chat-search').value);
 }
 
@@ -384,7 +450,7 @@ function sendMedia(type) {
    Emoji Picker
    ════════════════════════════════════════════ */
 function initEmojiPicker() {
-  const emojis = ['😊','😂','❤️','👍','🎉','🔥','😍','🤔','😅','👋','💪','😎','🥳','😢','🙏','💯','✅','❌','⭐','🌙','😤','🤝','😏','🫡','🥺','💀','🤣','❤️‍🔥','🫶','😎'];
+  const emojis = ['😊','😂','❤️','👍','🎉','🔥','😍','🤔','😅','👋','💪','😎','🥳','😢','🙏','💯','✅','❌','⭐','🌙','😤','🤝','😏','🫡','🥺','💀','🤣','❤️‍🔥','🫶','🎊'];
   const grid = $('emoji-grid');
   emojis.forEach(e => {
     const span = document.createElement('span');
@@ -398,21 +464,14 @@ function initEmojiPicker() {
     grid.appendChild(span);
   });
 }
-
-function toggleEmojiPicker() {
-  $('emoji-picker').classList.toggle('open');
-  closeAttachMenu();
-}
-function closeEmojiPicker() { $('emoji-picker').classList.remove('open'); }
+function toggleEmojiPicker() { $('emoji-picker').classList.toggle('open'); closeAttachMenu(); }
+function closeEmojiPicker()  { $('emoji-picker').classList.remove('open'); }
 
 /* ════════════════════════════════════════════
    Attachment Menu
    ════════════════════════════════════════════ */
-function toggleAttachMenu() {
-  $('attach-menu').classList.toggle('open');
-  closeEmojiPicker();
-}
-function closeAttachMenu() { $('attach-menu').classList.remove('open'); }
+function toggleAttachMenu() { $('attach-menu').classList.toggle('open'); closeEmojiPicker(); }
+function closeAttachMenu()  { $('attach-menu').classList.remove('open'); }
 
 /* ════════════════════════════════════════════
    Voice Recording
@@ -427,7 +486,7 @@ function startRecording() {
 
   const wave = $('rec-wave');
   wave.innerHTML = '';
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < 32; i++) {
     const bar = document.createElement('div');
     bar.className = 'rec-wave-bar';
     bar.style.animationDelay = (Math.random() * 0.5) + 's';
@@ -438,7 +497,7 @@ function startRecording() {
     state.recSeconds++;
     const m = Math.floor(state.recSeconds / 60);
     const s = state.recSeconds % 60;
-    $('rec-indicator').querySelector('span').textContent = m + ':' + String(s).padStart(2, '0');
+    $('rec-time-display').textContent = m + ':' + String(s).padStart(2, '0');
   }, 1000);
 }
 
@@ -446,7 +505,6 @@ function stopRecording() {
   if (!$('rec-indicator').classList.contains('active')) return;
   clearInterval(state.recTimer);
   resetRecordingUI();
-
   if (state.recSeconds > 0) {
     const conv = getConv(state.currentChatId);
     if (!conv) return;
@@ -472,7 +530,7 @@ function resetRecordingUI() {
 }
 
 /* ════════════════════════════════════════════
-   Contact List (New Chat)
+   Contact List
    ════════════════════════════════════════════ */
 function renderContactList(filter = '') {
   const el = $('contact-list');
@@ -484,13 +542,21 @@ function renderContactList(filter = '') {
     .forEach(c => {
       html += `
         <div class="contact-item" data-contact-id="${c.id}">
-          <div class="avatar-sm">${c.initial}</div>
-          <div class="chat-item-name">${c.name}</div>
+          <div class="avatar-wrap">
+            <div class="avatar avatar-36">
+              <img src="${c.avatar}" alt="${c.initial}" onerror="this.style.display='none';this.nextSibling.style.display=''">
+              <span style="display:none">${c.initial}</span>
+            </div>
+            <span class="status-dot sm ${c.status}"></span>
+          </div>
+          <div class="contact-item-info">
+            <div class="contact-item-name">${c.name}</div>
+            <div class="contact-item-status">${c.statusText}</div>
+          </div>
         </div>`;
     });
 
-  el.innerHTML = html || '<div class="empty-state"><span>No contacts found</span></div>';
-
+  el.innerHTML = html || '<div class="empty-state" style="padding-top:48px;"><span>No contacts found</span></div>';
   el.querySelectorAll('.contact-item').forEach(item => {
     item.addEventListener('click', () => openChatFromContact(parseInt(item.dataset.contactId)));
   });
@@ -520,13 +586,20 @@ function renderGroupContactList(filter = '') {
       html += `
         <div class="contact-item${checked ? ' selected' : ''}" data-gc-id="${c.id}">
           <div class="contact-check${checked ? ' checked' : ''}"></div>
-          <div class="avatar-sm">${c.initial}</div>
-          <div class="chat-item-name">${c.name}</div>
+          <div class="avatar-wrap">
+            <div class="avatar avatar-36">
+              <img src="${c.avatar}" alt="${c.initial}" onerror="this.style.display='none';this.nextSibling.style.display=''">
+              <span style="display:none">${c.initial}</span>
+            </div>
+          </div>
+          <div class="contact-item-info">
+            <div class="contact-item-name">${c.name}</div>
+            <div class="contact-item-status">${c.statusText}</div>
+          </div>
         </div>`;
     });
 
   el.innerHTML = html;
-
   el.querySelectorAll('.contact-item').forEach(item => {
     item.addEventListener('click', () => toggleGroupContact(parseInt(item.dataset.gcId)));
   });
@@ -549,15 +622,12 @@ function updateGroupSelectedBar() {
 function createGroup() {
   const name = $('group-name-input').value.trim();
   if (!name) return;
-
   const conv = {
-    id: Date.now(),
-    type: 'group',
-    name,
+    id: Date.now(), type: 'group', name,
     description: $('group-desc-input').value.trim(),
     participants: [...state.selectedGroupContacts],
     unread: 0,
-    messages: [{ from: 'me', text: 'Created group "' + name + '"', time: nowTime() }]
+    messages: [{ from: 'me', text: `Created group "${name}"`, time: nowTime() }]
   };
   state.conversations.unshift(conv);
   renderChatList();
@@ -575,62 +645,91 @@ function openInfo() {
   footer.innerHTML = '';
 
   if (conv.type === 'individual') {
-    const c = state.contacts.find(ct => ct.id === conv.contactId);
+    const c = contactById(conv.contactId);
     if (!c) return;
     $('info-title').textContent = c.name;
     el.innerHTML = `
       <div class="info-header">
-        <div class="avatar-lg">${c.initial}</div>
-        <div class="panel-header-name" style="font-size:18px;">${c.name}</div>
-        <div class="panel-header-status">Available</div>
+        <div class="avatar-wrap">
+          <div class="avatar avatar-88">
+            <img src="${c.avatar}" alt="${c.initial}" onerror="this.style.display='none';this.nextSibling.style.display=''">
+            <span style="display:none">${c.initial}</span>
+          </div>
+          <span class="status-dot ${c.status}" style="width:14px;height:14px;bottom:2px;right:2px;"></span>
+        </div>
+        <div class="info-name">${c.name}</div>
+        <div class="info-sub">${c.statusText}</div>
       </div>
       <div class="section-label">Options</div>
-      <div class="settings-item"><span class="settings-label">Mute Notifications</span><div class="toggle" data-toggle></div></div>
-      <div class="settings-item"><span class="settings-label">Starred Messages</span><svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:#999;fill:none;stroke-width:1.5;"><polyline points="9 18 15 12 9 6"/></svg></div>
-      <div class="settings-item"><span class="settings-label" style="font-weight:bold;">Block ${c.name}</span></div>`;
-
+      <div class="settings-item">
+        <i data-lucide="bell-off" style="width:17px;height:17px;stroke:var(--gray-400);fill:none;stroke-width:1.8;flex-shrink:0;"></i>
+        <span class="settings-label">Mute Notifications</span>
+        <div class="toggle" data-toggle></div>
+      </div>
+      <div class="settings-item">
+        <i data-lucide="star" style="width:17px;height:17px;stroke:var(--gray-400);fill:none;stroke-width:1.8;flex-shrink:0;"></i>
+        <span class="settings-label">Starred Messages</span>
+        <i data-lucide="chevron-right" style="width:15px;height:15px;stroke:var(--gray-300);fill:none;stroke-width:2;"></i>
+      </div>
+      <div class="settings-item" style="color:#dc2626;">
+        <i data-lucide="slash" style="width:17px;height:17px;stroke:#dc2626;fill:none;stroke-width:1.8;flex-shrink:0;"></i>
+        <span class="settings-label" style="color:#dc2626;font-weight:600;">Block ${c.name}</span>
+      </div>`;
     el.querySelectorAll('[data-toggle]').forEach(t => t.addEventListener('click', () => t.classList.toggle('on')));
 
   } else {
     $('info-title').textContent = 'Group Info';
     let pHtml = '';
-    conv.participants.forEach(pid => {
-      const c = state.contacts.find(ct => ct.id === pid);
+    conv.participants.forEach((pid, idx) => {
+      const c = contactById(pid);
       if (!c) return;
       pHtml += `
         <div class="group-participant">
-          <div class="avatar-sm">${c.initial}</div>
+          <div class="avatar avatar-36">
+            <img src="${c.avatar}" alt="${c.initial}" onerror="this.style.display='none';this.nextSibling.style.display=''">
+            <span style="display:none">${c.initial}</span>
+          </div>
           <div class="group-participant-name">${c.name}</div>
-          ${pid === conv.participants[0] ? '<span class="group-role">Admin</span>' : ''}
+          ${idx === 0 ? '<span class="group-role">Admin</span>' : ''}
         </div>`;
     });
     pHtml += `
       <div class="group-participant">
-        <div class="avatar-sm">${state.userName[0].toUpperCase()}</div>
+        <div class="avatar avatar-36">${state.userName[0].toUpperCase()}</div>
         <div class="group-participant-name">${state.userName} (You)</div>
         <span class="group-role">Admin</span>
       </div>`;
 
     el.innerHTML = `
       <div class="info-header">
-        <div class="avatar-lg">${conv.name[0]}</div>
-        <div class="panel-header-name" style="font-size:18px;">${conv.name}</div>
-        <div class="panel-header-status">${conv.participants.length + 1} participants</div>
-        ${conv.description ? '<div class="info-desc">' + conv.description + '</div>' : ''}
+        <div class="avatar avatar-88">${conv.name[0]}</div>
+        <div class="info-name">${conv.name}</div>
+        <div class="info-sub">${conv.participants.length + 1} participants</div>
+        ${conv.description ? `<div class="info-desc">${conv.description}</div>` : ''}
       </div>
       <div class="section-label">Participants</div>
       ${pHtml}
       <div class="settings-item">
-        <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:#111;fill:none;stroke-width:1.5;flex-shrink:0;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <i data-lucide="user-plus" style="width:17px;height:17px;stroke:var(--black);fill:none;stroke-width:1.8;flex-shrink:0;"></i>
         <span class="settings-label">Add Participant</span>
       </div>
       <div class="section-label">Group Settings</div>
-      <div class="settings-item"><span class="settings-label">Mute Notifications</span><div class="toggle" data-toggle></div></div>
-      <div class="settings-item"><span class="settings-label">Only Admins Can Send</span><div class="toggle" data-toggle></div></div>
-      <div class="settings-item"><span class="settings-label">Edit Group Name</span><svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:#999;fill:none;stroke-width:1.5;"><polyline points="9 18 15 12 9 6"/></svg></div>`;
-
+      <div class="settings-item">
+        <i data-lucide="bell-off" style="width:17px;height:17px;stroke:var(--gray-400);fill:none;stroke-width:1.8;flex-shrink:0;"></i>
+        <span class="settings-label">Mute Notifications</span>
+        <div class="toggle" data-toggle></div>
+      </div>
+      <div class="settings-item">
+        <i data-lucide="shield" style="width:17px;height:17px;stroke:var(--gray-400);fill:none;stroke-width:1.8;flex-shrink:0;"></i>
+        <span class="settings-label">Only Admins Can Send</span>
+        <div class="toggle" data-toggle></div>
+      </div>
+      <div class="settings-item">
+        <i data-lucide="edit-2" style="width:17px;height:17px;stroke:var(--gray-400);fill:none;stroke-width:1.8;flex-shrink:0;"></i>
+        <span class="settings-label">Edit Group Name</span>
+        <i data-lucide="chevron-right" style="width:15px;height:15px;stroke:var(--gray-300);fill:none;stroke-width:2;"></i>
+      </div>`;
     el.querySelectorAll('[data-toggle]').forEach(t => t.addEventListener('click', () => t.classList.toggle('on')));
-
     footer.innerHTML = '<button class="btn btn-full btn-danger" id="btn-leave-group">Leave Group</button>';
     $('btn-leave-group').addEventListener('click', leaveGroup);
   }
@@ -653,17 +752,19 @@ function startCall(type) {
   state.callType = type;
   const conv = getConv(state.currentChatId);
   if (!conv) return;
-  let name, initial;
+  let name, avatarSrc, initial;
   if (conv.type === 'individual') {
-    const c = state.contacts.find(ct => ct.id === conv.contactId);
-    name = c.name; initial = c.initial;
+    const c = contactById(conv.contactId);
+    name = c.name; avatarSrc = c.avatar; initial = c.initial;
   } else {
-    name = conv.name; initial = name[0];
+    name = conv.name; avatarSrc = ''; initial = name[0];
   }
 
-  $('call-avatar').textContent = initial;
+  const callAvEl = $('call-avatar');
+  setAvatar(callAvEl, avatarSrc, initial);
+  callAvEl.style.borderRadius = '50%';
   $('call-name').textContent = name;
-  $('call-status').textContent = type === 'video' ? 'Video Calling...' : 'Calling...';
+  $('call-status').textContent = type === 'video' ? 'Video calling…' : 'Calling…';
   $('call-timer').classList.add('hidden');
   $('ctrl-mute').classList.remove('active-ctrl');
   $('ctrl-speaker').classList.remove('active-ctrl');
@@ -672,14 +773,14 @@ function startCall(type) {
 
   setTimeout(() => {
     if (!$('overlay-call').classList.contains('hidden')) {
-      $('call-status').textContent = type === 'video' ? 'Video Connected' : 'Connected';
+      $('call-status').textContent = type === 'video' ? 'Video connected' : 'Connected';
       state.callSeconds = 0;
       $('call-timer').classList.remove('hidden');
       state.callTimer = setInterval(() => {
         state.callSeconds++;
         const m = Math.floor(state.callSeconds / 60);
         const s = state.callSeconds % 60;
-        $('call-timer').textContent = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+        $('call-timer').textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
       }, 1000);
     }
   }, 2000);
@@ -691,12 +792,13 @@ function endCall() {
 }
 
 /* ════════════════════════════════════════════
-   Settings
+   Settings / Profile
    ════════════════════════════════════════════ */
 function updateSettingsUI() {
   $('settings-name').textContent = state.userName;
-  $('settings-avatar').textContent = state.userName[0].toUpperCase();
   $('settings-status').textContent = state.userStatus;
+  const el = $('settings-avatar');
+  el.textContent = state.userName[0].toUpperCase();
 }
 
 function populateProfileEdit() {
@@ -708,7 +810,7 @@ function saveProfile() {
   const name = $('edit-name').value.trim();
   if (name) state.userName = name;
   state.userStatus = $('edit-status').value.trim() || 'Available';
-  $('sidebar-user').textContent = state.userName[0].toUpperCase();
+  $('sidebar-avatar-letter').textContent = state.userName[0].toUpperCase();
   showView('view-settings');
   updateSettingsUI();
 }
@@ -722,14 +824,16 @@ function logout() {
 }
 
 /* ════════════════════════════════════════════
-   Toast Notification
+   Toast
    ════════════════════════════════════════════ */
-function showToast(name, msg) {
+function showToast(contact, msg) {
   clearTimeout(state.toastTimer);
   const toast = $('toast');
-  toast.querySelector('.toast-avatar').textContent = name[0].toUpperCase();
-  toast.querySelector('.toast-name').textContent = name;
-  toast.querySelector('.toast-msg').textContent = msg;
+  const avEl = $('toast-avatar-el');
+  setAvatar(avEl, contact.avatar, contact.initial);
+  avEl.style.borderRadius = '50%';
+  $('toast-name-el').textContent = contact.name;
+  $('toast-msg-el').textContent = msg;
   toast.classList.add('show');
   state.toastTimer = setTimeout(() => toast.classList.remove('show'), 3500);
 }
@@ -737,13 +841,12 @@ function showToast(name, msg) {
 /* ════════════════════════════════════════════
    Helpers
    ════════════════════════════════════════════ */
-function getConv(id) {
-  return state.conversations.find(c => c.id === id);
-}
+function getConv(id) { return state.conversations.find(c => c.id === id); }
 
 function nowTime() {
   const d = new Date();
-  return d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0');
+  const h = d.getHours(), m = d.getMinutes();
+  return (h % 12 || 12) + ':' + String(m).padStart(2,'0') + ' ' + (h < 12 ? 'AM' : 'PM');
 }
 
 /* ════════════════════════════════════════════

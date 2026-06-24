@@ -3,349 +3,38 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Messenger — Lo-Fi Wireframe</title>
+  <title>Messenger</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
 <div class="app" id="app">
 
-  <!-- ═══ Toast Notification ═══ -->
-  <div class="toast" id="toast">
-    <div class="toast-avatar">A</div>
-    <div class="toast-body">
-      <div class="toast-name">Alice</div>
-      <div class="toast-msg">Hey, are you free later?</div>
-    </div>
-  </div>
+  <!-- ── Global toast (always present) ── -->
+  <div id="partial-toast"></div>
 
-  <!-- ═══ OVERLAY: Login ═══ -->
-  <div class="overlay" id="overlay-login">
-    <div class="overlay-card">
-      <div class="overlay-logo">
-        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-      </div>
-      <div class="overlay-title">Messenger</div>
-      <div class="overlay-subtitle">Enter your phone number to receive a verification code.</div>
-      <div class="overlay-field">
-        <label>Phone Number</label>
-        <input class="input" type="tel" id="phone-input" placeholder="+1 (555) 000-0000" maxlength="20">
-      </div>
-      <button class="btn btn-full" id="btn-send-code">Send Verification Code</button>
-    </div>
-  </div>
+  <!-- ── Auth overlays (login / verify / profile / call) ── -->
+  <div id="partial-overlays"></div>
 
-  <!-- ═══ OVERLAY: Verify ═══ -->
-  <div class="overlay hidden" id="overlay-verify">
-    <button class="icon-btn overlay-back" id="btn-verify-back">
-      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-    </button>
-    <div class="overlay-card">
-      <div class="overlay-title">Verification</div>
-      <div class="overlay-subtitle">A code was sent to<br><strong id="verify-phone-display">+1 (555) 000-0000</strong></div>
-      <div class="overlay-field">
-        <label>Enter 6-Digit Code</label>
-        <input class="input input-center" type="text" id="code-input" placeholder="000000" maxlength="6">
-      </div>
-      <button class="btn btn-full" id="btn-verify">Verify</button>
-      <div class="overlay-subtitle">Didn't receive it? <span class="link" id="resend-link">Resend</span></div>
-    </div>
-  </div>
-
-  <!-- ═══ OVERLAY: Profile Setup ═══ -->
-  <div class="overlay hidden" id="overlay-profile">
-    <div class="overlay-card">
-      <div class="overlay-title">Profile Setup</div>
-      <div class="photo-placeholder">
-        <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-        <span>Add Photo</span>
-      </div>
-      <div class="overlay-field">
-        <label>Your Name</label>
-        <input class="input" type="text" id="name-input" placeholder="John Doe">
-      </div>
-      <div class="overlay-field">
-        <label>Status (optional)</label>
-        <input class="input" type="text" id="status-input" placeholder="Available">
-      </div>
-      <button class="btn btn-full" id="btn-done-setup">Done</button>
-    </div>
-  </div>
-
-  <!-- ═══ OVERLAY: Call ═══ -->
-  <div class="overlay hidden" id="overlay-call">
-    <div class="call-container">
-      <div class="avatar-lg" id="call-avatar">A</div>
-      <div class="call-name-display" id="call-name">Alice</div>
-      <div class="call-status-display" id="call-status">Calling...</div>
-      <div class="call-timer-display hidden" id="call-timer">00:00</div>
-      <div class="call-controls">
-        <div class="call-ctrl" id="ctrl-mute">
-          <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-          <span>Mute</span>
-        </div>
-        <div class="call-ctrl" id="ctrl-speaker">
-          <svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-          <span>Speaker</span>
-        </div>
-        <div class="call-ctrl end" id="ctrl-end">
-          <svg viewBox="0 0 24 24"><path d="M10.68 13.31a16 16 0 0 0 3.41 2.6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 17v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 2.59 3.4z" transform="rotate(135 12 12)"/></svg>
-          <span>End</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══ MAIN LAYOUT ═══ -->
+  <!-- ── Main layout (hidden until login) ── -->
   <div class="main-layout hidden" id="main-layout">
+    <div id="partial-sidebar"></div>
 
-    <!-- ── Sidebar ── -->
-    <aside class="sidebar">
-      <div class="sidebar-header">
-        <div class="sidebar-user" id="sidebar-user" title="Your profile">Y</div>
-        <span class="sidebar-title">Chats</span>
-        <button class="icon-btn" id="btn-new-chat" title="New Chat">
-          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        </button>
-        <button class="icon-btn" id="btn-settings" title="Settings">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        </button>
-      </div>
-      <div class="sidebar-search">
-        <input class="search-input" id="chat-search" placeholder="Search chats...">
-      </div>
-      <div class="sidebar-list" id="chat-list"></div>
-    </aside>
-
-    <!-- ── Panel ── -->
     <main class="panel" id="panel">
-
-      <!-- Empty State -->
-      <div class="panel-view active" id="view-empty">
-        <div class="empty-state">
-          <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          <span>Select a conversation to start messaging</span>
-        </div>
-      </div>
-
-      <!-- Chat View -->
-      <div class="panel-view" id="view-chat">
-        <div class="panel-header">
-          <div class="panel-header-info" id="chat-header-info">
-            <div class="avatar-sm" id="chat-avatar">A</div>
-            <div>
-              <div class="panel-header-name" id="chat-name">Alice</div>
-              <div class="panel-header-status">online</div>
-            </div>
-          </div>
-          <div class="panel-header-actions">
-            <button class="icon-btn" id="btn-voice-call" title="Voice Call">
-              <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-            </button>
-            <button class="icon-btn" id="btn-video-call" title="Video Call">
-              <svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
-            </button>
-            <button class="icon-btn" id="btn-chat-info" title="Info">
-              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-            </button>
-          </div>
-        </div>
-        <div class="chat-messages" id="chat-messages"></div>
-        <div class="emoji-picker" id="emoji-picker"><div class="emoji-grid" id="emoji-grid"></div></div>
-        <div class="attach-menu" id="attach-menu">
-          <div class="attach-option" id="attach-photo">
-            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-            Photo
-          </div>
-          <div class="attach-option" id="attach-video">
-            <svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
-            Video
-          </div>
-          <div class="attach-option" id="attach-document">
-            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-            Document
-          </div>
-        </div>
-        <div class="chat-input-bar">
-          <button class="icon-btn" id="btn-attach" title="Attach">
-            <svg viewBox="0 0 24 24" style="width:16px;height:16px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          </button>
-          <input class="chat-input" id="msg-input" placeholder="Type a message...">
-          <button class="icon-btn" id="btn-emoji" title="Emoji">
-            <svg viewBox="0 0 24 24" style="width:16px;height:16px;"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
-          </button>
-          <button class="icon-btn hidden" id="btn-mic" title="Hold to record">
-            <svg viewBox="0 0 24 24" style="width:16px;height:16px;"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-          </button>
-          <div class="recording-indicator" id="rec-indicator">
-            <div class="rec-dot"></div>
-            <span>0:00</span>
-            <div class="rec-wave" id="rec-wave"></div>
-            <button class="icon-btn" id="btn-cancel-rec" title="Cancel" style="width:28px;height:28px;">
-              <svg viewBox="0 0 24 24" style="width:14px;height:14px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
-          </div>
-          <button class="send-btn disabled" id="send-btn" title="Send">
-            <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-          </button>
-        </div>
-      </div>
-
-      <!-- New Chat View -->
-      <div class="panel-view" id="view-new-chat">
-        <div class="panel-header">
-          <button class="icon-btn" id="btn-back-new-chat">
-            <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-          </button>
-          <span class="panel-header-name">New Chat</span>
-        </div>
-        <div class="panel-search">
-          <input class="search-input" id="contact-search" placeholder="Search contacts...">
-        </div>
-        <div class="list-action" id="btn-new-group">
-          <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          New Group
-        </div>
-        <div class="panel-list" id="contact-list"></div>
-      </div>
-
-      <!-- Group Create View -->
-      <div class="panel-view" id="view-group-create">
-        <div class="panel-header">
-          <button class="icon-btn" id="btn-back-group-create">
-            <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-          </button>
-          <span class="panel-header-name">Add Participants</span>
-        </div>
-        <div class="panel-search">
-          <input class="search-input" id="group-search" placeholder="Search contacts...">
-        </div>
-        <div class="panel-list" id="group-contact-list"></div>
-        <div class="selected-bar" id="group-selected-bar">
-          <span id="group-selected-count">0 selected</span>
-          <button class="btn btn-sm" id="btn-group-next">Next</button>
-        </div>
-      </div>
-
-      <!-- Group Name View -->
-      <div class="panel-view" id="view-group-name">
-        <div class="panel-header">
-          <button class="icon-btn" id="btn-back-group-name">
-            <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-          </button>
-          <span class="panel-header-name">Group Details</span>
-        </div>
-        <div class="empty-state" style="justify-content:flex-start;padding-top:60px;">
-          <div class="photo-placeholder">
-            <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-            <span>Group Icon</span>
-          </div>
-          <div class="overlay-field" style="width:260px;margin-top:20px;">
-            <label>Group Name</label>
-            <input class="input" type="text" id="group-name-input" placeholder="e.g. Project Team">
-          </div>
-          <div class="overlay-field" style="width:260px;">
-            <label>Description (optional)</label>
-            <input class="input" type="text" id="group-desc-input" placeholder="What's this group about?">
-          </div>
-          <button class="btn btn-full" style="width:260px;" id="btn-create-group">Create Group</button>
-        </div>
-      </div>
-
-      <!-- Info View (Contact or Group) -->
-      <div class="panel-view" id="view-info">
-        <div class="panel-header">
-          <button class="icon-btn" id="btn-back-info">
-            <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-          </button>
-          <span class="panel-header-name" id="info-title">Info</span>
-        </div>
-        <div class="settings-scroll" id="info-content"></div>
-        <div style="padding:16px;" id="info-footer"></div>
-      </div>
-
-      <!-- Settings View -->
-      <div class="panel-view" id="view-settings">
-        <div class="panel-header">
-          <button class="icon-btn" id="btn-back-settings">
-            <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-          </button>
-          <span class="panel-header-name">Settings</span>
-        </div>
-        <div class="settings-scroll">
-          <div class="settings-section" id="settings-profile-card">
-            <div class="settings-profile">
-              <div class="avatar" id="settings-avatar">Y</div>
-              <div>
-                <div class="settings-name" id="settings-name">You</div>
-                <div class="settings-status-text" id="settings-status">Available</div>
-              </div>
-            </div>
-          </div>
-          <div class="section-label">Privacy</div>
-          <div class="settings-item"><span class="settings-label">Last Seen</span><span class="settings-value">Everyone</span></div>
-          <div class="settings-item"><span class="settings-label">Read Receipts</span><div class="toggle on" data-toggle></div></div>
-          <div class="settings-item" id="btn-blocked">
-            <span class="settings-label">Blocked Contacts</span>
-            <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-          </div>
-          <div class="section-label">Notifications</div>
-          <div class="settings-item"><span class="settings-label">Message Notifications</span><div class="toggle on" data-toggle></div></div>
-          <div class="settings-item"><span class="settings-label">Show Preview</span><div class="toggle on" data-toggle></div></div>
-          <div class="settings-item"><span class="settings-label">Sound</span><div class="toggle on" data-toggle></div></div>
-          <div class="section-label">Storage & Data</div>
-          <div class="settings-item"><span class="settings-label">Media Auto-Download</span><div class="toggle" data-toggle></div></div>
-          <div class="settings-item"><span class="settings-label">Storage Used</span><span class="settings-value">1.2 GB</span></div>
-          <div class="settings-item"><span class="settings-label">Network Usage</span><span class="settings-value">348 MB this month</span></div>
-          <div class="section-label">Account</div>
-          <div class="settings-item" id="btn-logout"><span class="settings-label" style="font-weight:bold;">Log Out</span></div>
-          <div style="height:24px;"></div>
-        </div>
-      </div>
-
-      <!-- Profile Edit View -->
-      <div class="panel-view" id="view-profile-edit">
-        <div class="panel-header">
-          <button class="icon-btn" id="btn-back-profile-edit">
-            <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-          </button>
-          <span class="panel-header-name">Edit Profile</span>
-        </div>
-        <div class="empty-state" style="justify-content:flex-start;padding-top:60px;">
-          <div class="photo-placeholder">
-            <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-            <span>Change Photo</span>
-          </div>
-          <div class="overlay-field" style="width:300px;margin-top:20px;">
-            <label>Name</label>
-            <input class="input" type="text" id="edit-name" placeholder="Your name">
-          </div>
-          <div class="overlay-field" style="width:300px;">
-            <label>Status</label>
-            <input class="input" type="text" id="edit-status" placeholder="Your status">
-          </div>
-          <button class="btn btn-full" style="width:300px;" id="btn-save-profile">Save</button>
-        </div>
-      </div>
-
-      <!-- Blocked Contacts View -->
-      <div class="panel-view" id="view-blocked">
-        <div class="panel-header">
-          <button class="icon-btn" id="btn-back-blocked">
-            <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-          </button>
-          <span class="panel-header-name">Blocked Contacts</span>
-        </div>
-        <div class="empty-state">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
-          <span>No blocked contacts</span>
-        </div>
-      </div>
-
+      <div id="partial-view-empty"></div>
+      <div id="partial-view-chat"></div>
+      <div id="partial-view-new-chat"></div>
+      <div id="partial-view-group"></div>
+      <div id="partial-view-info"></div>
+      <div id="partial-view-settings"></div>
+      <div id="partial-view-profile-edit"></div>
+      <div id="partial-view-blocked"></div>
     </main>
   </div>
+
 </div>
 
-<script src="app.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="loader.js"></script>
 </body>
 </html>

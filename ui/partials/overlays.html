@@ -1,0 +1,94 @@
+<!-- ═══════════════════════════════════════════
+     OVERLAYS  (Login → Verify → Profile → Call)
+     All overlays sit on z-index:50 and are shown
+     one-at-a-time via showOverlay(id) in app.js.
+
+     Flow:
+       overlay-login  →  overlay-verify  →  overlay-profile  →  enterApp()
+       startCall()    →  overlay-call    →  endCall()
+     ═══════════════════════════════════════════ -->
+
+<!-- Login -->
+<div class="overlay" id="overlay-login">
+  <div class="overlay-card">
+    <div class="overlay-logo">
+      <i data-lucide="message-circle" style="width:28px;height:28px;stroke:white;stroke-width:1.8;fill:none;"></i>
+    </div>
+    <div class="overlay-title">Messenger</div>
+    <div class="overlay-subtitle">Enter your phone number to get a verification code.</div>
+    <div class="overlay-field">
+      <label>Phone Number</label>
+      <input class="input" type="tel" id="phone-input" placeholder="+1 (555) 000-0000" maxlength="20">
+    </div>
+    <button class="btn btn-full" id="btn-send-code">
+      <i data-lucide="send" style="width:15px;height:15px;stroke:white;fill:none;stroke-width:2;"></i>
+      Send Code
+    </button>
+  </div>
+</div>
+
+<!-- Verify -->
+<div class="overlay hidden" id="overlay-verify">
+  <button class="icon-btn overlay-back" id="btn-verify-back">
+    <i data-lucide="arrow-left"></i>
+  </button>
+  <div class="overlay-card">
+    <div class="overlay-logo">
+      <i data-lucide="shield-check" style="width:28px;height:28px;stroke:white;fill:none;stroke-width:1.8;"></i>
+    </div>
+    <div class="overlay-title">Verify</div>
+    <div class="overlay-subtitle">A 6-digit code was sent to<br><strong id="verify-phone-display">+1 (555) 000-0000</strong></div>
+    <div class="overlay-field">
+      <label>Verification Code</label>
+      <input class="input input-center" type="text" id="code-input" placeholder="——————" maxlength="6">
+    </div>
+    <button class="btn btn-full" id="btn-verify">Verify & Continue</button>
+    <div class="overlay-subtitle">Didn't receive it? <span class="link" id="resend-link">Resend</span></div>
+  </div>
+</div>
+
+<!-- Profile Setup -->
+<div class="overlay hidden" id="overlay-profile">
+  <div class="overlay-card">
+    <div class="overlay-title">Set up your profile</div>
+    <div class="photo-placeholder">
+      <i data-lucide="camera" style="width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.6;"></i>
+      <span>Add photo</span>
+    </div>
+    <div class="overlay-field">
+      <label>Your Name</label>
+      <input class="input" type="text" id="name-input" placeholder="e.g. Jane Doe">
+    </div>
+    <div class="overlay-field">
+      <label>Status (optional)</label>
+      <input class="input" type="text" id="status-input" placeholder="Available">
+    </div>
+    <button class="btn btn-full" id="btn-done-setup">Get Started</button>
+  </div>
+</div>
+
+<!-- Call -->
+<div class="overlay hidden" id="overlay-call" style="background:transparent;">
+  <div class="overlay-call-inner" style="width:100%;height:100%;">
+    <div class="avatar-wrap">
+      <div class="avatar avatar-88" id="call-avatar"></div>
+    </div>
+    <div class="call-name-display" id="call-name">Alice Morgan</div>
+    <div class="call-status-display" id="call-status">Calling…</div>
+    <div class="call-timer-display hidden" id="call-timer">00:00</div>
+    <div class="call-controls">
+      <button class="call-ctrl" id="ctrl-mute">
+        <i data-lucide="mic-off"></i>
+        <span>Mute</span>
+      </button>
+      <button class="call-ctrl" id="ctrl-speaker">
+        <i data-lucide="volume-2"></i>
+        <span>Speaker</span>
+      </button>
+      <button class="call-ctrl end" id="ctrl-end">
+        <i data-lucide="phone-off"></i>
+        <span>End</span>
+      </button>
+    </div>
+  </div>
+</div>
