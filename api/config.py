@@ -2,15 +2,14 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    database_url: str = "postgresql+asyncpg://apikey_user:apikey_pass@db:5432/apikey_db"
-    service_name: str = "api-key-management"
-    key_prefix_live: str = "sk_live"
-    key_prefix_test: str = "sk_test"
-    key_prefix_dev: str = "sk_dev"
-    default_key_length: int = 32
+    DATABASE_URL: str = "postgresql+asyncpg://apikey_user:apikey_pass@db:5432/apikey_db"
+    SERVICE_NAME: str = "api-key-management"
+    KEY_PREFIX_TEST: str = "sk_test"
+    KEY_PREFIX_DEV: str = "sk_dev"
+    DEFAULT_KEY_LENGTH: int = 32
 
     class Config:
-        env_file = ".env1"
+        env_file = ".env"
 
 
 settings = Settings()
