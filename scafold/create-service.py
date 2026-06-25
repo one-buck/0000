@@ -24,11 +24,113 @@ TEMPLATES: dict[str, str] = {
 WORKDIR /app
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install uv
+RUN uv pip install --system --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD sh -c "uvicorn app.main:app --host 0.0.0.0 --port ${SERVICE_PORT:-8000}"
+""",
+
+    "docker-compose.yml": """
+services:
+  app:
+    build: .
+    container_name: ${SERVICE_NAME}
+    env_file:
+      - .env
+    ports:
+      - "${SERVICE_PORT}:${SERVICE_PORT}"
+    restart: unless-stopped
+""",
+
+    ".gitignore": """# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+
+# Environment files
+.env
+
+# IDEs
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Added files
+.gitignore
+""",
+
+    "README.md": """# {{SERVICE_NAME}}
+
+FastAPI service template.
+
+## Features
+
+* 
+
+## Project Structure
+
+```text
+.
+├── app
+│   ├── routes
+│   ├── config.py
+│   ├── logger.py
+│   ├── dependencies.py
+│   ├── utils.py
+│   └── main.py
+├── tests
+├── Dockerfile
+├── docker-compose.yml
+├── requirements.txt
+├── .env.example
+└── README.md
+```
+### Folder & File Descriptions
+
+| Path                  | Purpose                                                              |
+|-----------------------|----------------------------------------------------------------------|
+| `app/`                | Core application package containing configs, routes, and utilities   |
+| `app/config.py`       | Centralized configuration using environment variables                |
+| `app/logger.py`       | Logging setup with custom formatter and log level control            |
+| `app/utils.py`        | Utility functions                                                    |
+| `app/dependencies.py` | Shared dependencies for injection across routes/services             |
+| `app/main.py`         | FastAPI entrypoint, lifespan events, and health check endpoint       |
+| `app/routes/`         | API route definitions grouped by feature                             |
+| `app/routes/items.py` | Example CRUD route for items                                         |
+| `tests/`              | Unit and integration tests                                           |
+| `Dockerfile`          | Container build instructions for the service                         |
+| `docker-compose.yml`  | Compose setup for local development and service orchestration        |
+| `requirements.txt`    | Python dependencies for the project                                  |
+| `.env.example`        | Example environment configuration file                               |
+| `.gitignore`          | Files and directories excluded from version control                  |
+| `README.md`           | Project documentation and usage guide                                |
+
+## Configuration
+
+```bash
+cp .env.example .env
+```
+
+## Running With Docker Compose
+
+```bash
+docker compose up --build
+```
+
+## Health Check
+
+```http
+GET /health
+```
+
 """,
 
     "requirements.txt": """fastapi==0.115.0
@@ -44,8 +146,8 @@ pydantic-settings==2.5.0
 
 class Settings(BaseSettings):
     SERVICE_NAME: str = "service"
-    DATABASE_URL: str
-    REDIS_URL: str | None = None
+    SERVICE_PORT: str = "8000"
+    SERVICE_URL: str = "localhost"
     LOG_LEVEL: str = "INFO"
 
     class Config:
@@ -75,6 +177,8 @@ def get_logger(name: str) -> logging.Logger:
 
     logger.setLevel(getattr(logging, settings.LOG_LEVEL.upper(), logging.INFO))
     return logger
+
+logger = get_logger(__name__)
 """,
 
     "app/utils.py": """from datetime import datetime, timezone
@@ -86,26 +190,17 @@ def now_utc() -> datetime:
 
 """,
 
-    "app/dependencies.py": """from functools import lru_cache
+    "app/dependencies.py": """from app.config import Settings
+from app.logger import logger
 
-from app.config import Settings
-
-
-@lru_cache
-def get_settings() -> Settings:
-    from app.config import settings
-    return settings
 """,
 
     "app/main.py": """from contextlib import asynccontextmanager
-
 from fastapi import FastAPI
 
 from app.config import settings
-from app.logger import get_logger
+from app.logger import logger
 from app.routes import router
-
-logger = get_logger(__name__)
 
 
 @asynccontextmanager
@@ -133,45 +228,47 @@ async def health():
     # ── app/routes/ ──
     "app/routes/__init__.py": """from fastapi import APIRouter
 
+from app.routes.items import router as items_router
+
+
 router = APIRouter()
 
-# Add your route modules below:
-# from app.routes.items import router as items_router
-# router.include_router(items_router, prefix="/items", tags=["items"])
+router.include_router(items_router, prefix="/items", tags=["items"])
+
 """,
 
     "app/routes/items.py": """from fastapi import APIRouter, Depends, HTTPException
 
 from app.models.schemas import ItemCreate, ItemResponse
-from app.services.item_service import ItemService, get_item_service
+
 
 router = APIRouter()
 
-
 @router.post("/", response_model=ItemResponse, status_code=201)
-async def create_item(
-    data: ItemCreate,
-    svc: ItemService = Depends(get_item_service),
-):
-    return await svc.create(data)
+async def create_item(data: ItemCreate):
+    return {
+    "id": 0,
+    "name": data.name,
+    "description": data.description,
+    "created_at": "2024-07-15T10:30:00"
+}
 
 
 @router.get("/{item_id}", response_model=ItemResponse)
-async def get_item(
-    item_id: int,
-    svc: ItemService = Depends(get_item_service),
-):
-    item = await svc.get(item_id)
-    if not item:
-        raise HTTPException(status_code=404, detail="Item not found")
-    return item
+async def get_item(item_id: int):
+    return {
+    "id": item_id,
+    "name": "Wireless Mouse",
+    "description": "A sleek ergonomic mouse with Bluetooth support",
+    "created_at": "2024-07-15T10:30:00"
+}
+
 """,
 
     # ── app/models/ ──
     "app/models/__init__.py": "",
 
     "app/models/schemas.py": """from datetime import datetime
-
 from pydantic import BaseModel, Field
 
 
@@ -192,132 +289,30 @@ class ItemResponse(ItemBase):
         from_attributes = True
 """,
 
-    "app/models/entities.py": """from datetime import datetime
-
-from sqlalchemy import Integer, String, Text, DateTime, func
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-
-
-class Base(DeclarativeBase):
-    pass
-
-
-class Item(Base):
-    __tablename__ = "items"
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    name: Mapped[str] = mapped_column(String(255), nullable=False)
-    description: Mapped[str | None] = mapped_column(Text, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now()
-    )
-""",
+    "app/models/entities.py": "",
 
     # ── app/services/ ──
     "app/services/__init__.py": "",
 
-    "app/services/item_service.py": """from fastapi import Depends
-
-from app.logger import get_logger
-from app.models.schemas import ItemCreate, ItemResponse
-from app.repositories.item_repo import ItemRepo, get_item_repo
-
-logger = get_logger(__name__)
-
-
-class ItemService:
-    def __init__(self, repo: ItemRepo):
-        self.repo = repo
-
-    async def create(self, data: ItemCreate) -> ItemResponse:
-        logger.info(f"Creating item: {data.name}")
-        item = await self.repo.insert(data.model_dump())
-        return ItemResponse.model_validate(item)
-
-    async def get(self, item_id: int) -> ItemResponse | None:
-        item = await self.repo.find_by_id(item_id)
-        if item:
-            return ItemResponse.model_validate(item)
-        return None
-
-
-def get_item_service(repo: ItemRepo = Depends(get_item_repo)) -> ItemService:
-    return ItemService(repo=repo)
-""",
-
     # ── app/repositories/ ──
     "app/repositories/__init__.py": "",
 
-    "app/repositories/item_repo.py": """from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
-
-from app.config import settings
-from app.models.entities import Base, Item
-
-engine = create_async_engine(settings.DATABASE_URL)
-async_session = async_sessionmaker(engine, expire_on_commit=False)
-
-
-class ItemRepo:
-    def __init__(self, session: AsyncSession):
-        self.session = session
-
-    async def insert(self, data: dict) -> Item:
-        item = Item(**data)
-        self.session.add(item)
-        await self.session.commit()
-        await self.session.refresh(item)
-        return item
-
-    async def find_by_id(self, item_id: int) -> Item | None:
-        result = await self.session.execute(select(Item).where(Item.id == item_id))
-        return result.scalar_one_or_none()
-
-
-async def get_item_repo() -> ItemRepo:
-    async with async_session() as session:
-        yield ItemRepo(session=session)
-""",
-
     # ── tests/ ──
     "tests/__init__.py": "",
-
-    "tests/conftest.py": """import pytest
-from httpx import AsyncClient, ASGITransport
-
-from app.main import app
-
-
-@pytest.fixture
-async def client():
-    transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url="http://test") as c:
-        yield c
-""",
-
-    "tests/test_items.py": """import pytest
-
-
-@pytest.mark.asyncio
-async def test_health(client):
-    response = await client.get("/health")
-    assert response.status_code == 200
-    assert response.json()["status"] == "ok"
-""",
 }
 
 
 def make_header(filename: str) -> str:
     """Generate file header for .py files."""
-    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    # format = "%Y-%m-%d %H:%M:%S"
+    format = "%Y-%m-%d"
+    now = datetime.now().strftime(format)
     separator = "=" * 70
     return f"'''\n{separator}\nFile: {filename}\nAuthor: {AUTHOR}\nCreated: {now}\n{separator}\n'''\n\n"
-
 
 def create_service(output_dir: str, service_name: str) -> None:
     out_path = Path(output_dir).resolve()
     service_dir = out_path / service_name
-    module_name = service_name.replace("-", "_")
 
     # Validate output dir
     if not out_path.exists():
@@ -340,18 +335,23 @@ def create_service(output_dir: str, service_name: str) -> None:
         file_path = service_dir / rel_path
         filename = file_path.name
 
-        # Add header only to .py files with content
-        if file_path.suffix == ".py" and content.strip():
+        # Add header only to .py files with/out content 
+        # if file_path.suffix == ".py" and content.strip():
+        if file_path.suffix == ".py" :
             full_content = make_header(filename) + content.lstrip("\n")
         else:
             full_content = content.lstrip("\n") if content else ""
-
+        
+        if filename == "README.md":
+            full_content = full_content.replace(
+                "{{SERVICE_NAME}}", service_name
+            )
         file_path.write_text(full_content, encoding="utf-8")
 
     # Write dynamic .env.example
     env_content = f"""SERVICE_NAME={service_name}
-DATABASE_URL=postgresql+asyncpg://user:pass@localhost:5432/{module_name}_db
-REDIS_URL=redis://localhost:6379/0
+SERVICE_PORT="8000"
+SERVICE_URL="localhost"
 LOG_LEVEL=INFO
 """
     (service_dir / ".env.example").write_text(env_content.strip(), encoding="utf-8")
@@ -359,11 +359,10 @@ LOG_LEVEL=INFO
     # Done
     print(f"\n{GREEN}✓ Service created successfully!{NC}\n")
     print("Next steps:")
-    print(f"  1. cd {service_dir}")
-    print("  2. cp .env.example .env")
-    print("  3. Edit .env with your settings")
-    print(f"  4. docker build -t {service_name} .")
-    print(f"  5. docker run -p 8000:8000 --env-file .env {service_name}")
+    print(f"cd {service_dir}")
+    print("cp .env.example .env")
+    print("# Edit .env with your settings")
+    print("docker compose up --build")
 
 
 def main() -> None:
