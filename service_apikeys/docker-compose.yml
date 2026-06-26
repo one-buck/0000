@@ -1,41 +1,37 @@
 services:
   db:
-    image: postgres:${POSTGRES_VERSION}
-    restart: unless-stopped
-    container_name: "DBpostgres"
-    env_file:
-      - .env
+    image: postgres:${POSTGRES_VERSION:-16-alpine}
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER:-apikey_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-apikey_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-apikey_db}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "${POSTGRES_PORT}:5432"
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"
-        ]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-apikey_user} -d ${POSTGRES_DB:-apikey_db}"]
       interval: 5s
       timeout: 5s
-      retries: 10
+      retries: 5
 
   api:
     build:
       context: .
       dockerfile: Dockerfile
-    restart: unless-stopped
-    container_name: ${SERVICE_NAME}
-    env_file:
-      - .env
     ports:
-      - "${SERVICE_PORT}:${SERVICE_PORT}"
+      - "${SERVICE_PORT:-8000}:8000"
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://apikey_user:apikey_pass@db:5432/apikey_db}
+      SERVICE_NAME: ${SERVICE_NAME:-api-key-management}
+      KEY_PREFIX_LIVE: ${KEY_PREFIX_LIVE:-sk_live}
+      KEY_PREFIX_TEST: ${KEY_PREFIX_TEST:-sk_test}
+      KEY_PREFIX_DEV: ${KEY_PREFIX_DEV:-sk_dev}
+      DEFAULT_KEY_LENGTH: ${DEFAULT_KEY_LENGTH:-32}
     depends_on:
       db:
         condition: service_healthy
+    restart: unless-stopped
 
 volumes:
   postgres_data:

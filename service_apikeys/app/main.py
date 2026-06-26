@@ -5,32 +5,44 @@ Author: Z Name,
 Created: 2026-06-25
 ======================================================================
 '''
-
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.logger import logger
+from app.models.entities import init_db
 from app.routes import router
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info(f"Starting {settings.SERVICE_NAME}")
-    # Startup logic here (db init, etc.)
+    """Application lifespan: initialize database on startup."""
+    await init_db()
     yield
-    logger.info(f"Shutting down {settings.SERVICE_NAME}")
-    # Cleanup here
 
 
 app = FastAPI(
-    title=settings.SERVICE_NAME,
+    title="API Key Management Service",
+    description=(
+        "Standalone service for API key lifecycle management: "
+        "create, verify, revoke, rotate."
+    ),
+    version="1.0.0",
     lifespan=lifespan,
 )
 
-app.include_router(router)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(router, prefix="/v1")
 
 
-@app.get("/health")
+@app.get("/health", tags=["health"])
 async def health():
+    """Health check endpoint."""
     return {"status": "ok", "service": settings.SERVICE_NAME}

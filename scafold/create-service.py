@@ -79,39 +79,64 @@ FastAPI service template.
 
 ```text
 .
-├── app
-│   ├── routes
-│   ├── config.py
-│   ├── logger.py
-│   ├── dependencies.py
-│   ├── utils.py
-│   └── main.py
-├── tests
-├── Dockerfile
-├── docker-compose.yml
-├── requirements.txt
-├── .env.example
-└── README.md
+├─── app
+│   │
+│   ├─── models
+│   │   ├─── entities.py
+│   │   ├─── schemas.py
+│   │   └─── __init__.py
+│   │
+│   ├─── repositories
+│   │   └─── __init__.py
+│   │
+│   ├─── routes
+│   │   ├─── items.py
+│   │   └─── __init__.py
+│   │       
+│   ├─── services
+│   │   └─── __init__.py
+│   │
+│   ├─── tests
+│   │   └─── __init__.py
+│   │
+│   ├─── config.py
+│   ├─── dependencies.py
+│   ├─── logger.py
+│   ├─── main.py
+│   ├─── utils.py
+│   └─── __init__.py
+│
+├─── .env.example
+├─── .gitignore
+├─── docker-compose.yml
+├─── Dockerfile
+├─── requirements.txt
+└─── README.md
 ```
 ### Folder & File Descriptions
 
-| Path                  | Purpose                                                              |
-|-----------------------|----------------------------------------------------------------------|
-| `app/`                | Core application package containing configs, routes, and utilities   |
-| `app/config.py`       | Centralized configuration using environment variables                |
-| `app/logger.py`       | Logging setup with custom formatter and log level control            |
-| `app/utils.py`        | Utility functions                                                    |
-| `app/dependencies.py` | Shared dependencies for injection across routes/services             |
-| `app/main.py`         | FastAPI entrypoint, lifespan events, and health check endpoint       |
-| `app/routes/`         | API route definitions grouped by feature                             |
-| `app/routes/items.py` | Example CRUD route for items                                         |
-| `tests/`              | Unit and integration tests                                           |
-| `Dockerfile`          | Container build instructions for the service                         |
-| `docker-compose.yml`  | Compose setup for local development and service orchestration        |
-| `requirements.txt`    | Python dependencies for the project                                  |
-| `.env.example`        | Example environment configuration file                               |
-| `.gitignore`          | Files and directories excluded from version control                  |
-| `README.md`           | Project documentation and usage guide                                |
+| Path                     | Purpose                                                             |
+|--------------------------|---------------------------------------------------------------------|
+| `app/`                   | CCore application package containing configs, routes, and utilities |
+| `app/config.py`          | Centralized configuration using environment variables               |
+| `app/dependencies.py`    | Shared dependencies for injection across routes/services            |
+| `app/logger.py`          | Logging configuration and custom logger setup                       |
+| `app/main.py`            | FastAPI entrypoint, lifespan events, and health check endpoint      |
+| `app/utils.py`           | Common utility and helper functions                                 |
+| `models/`                | Domain models, entities, and API schemas                            |
+| `models/entities.py`     | Database/domain entity definitions                                  |
+| `models/schemas.py`      | Pydantic request and response schemas                               |
+| `repositories/`          | Data access layer responsible for interacting with data sources     |
+| `routes/`                | API endpoint definitions grouped by feature                         |
+| `routes/items.py`        | Example CRUD route for items                                        |
+| `services/`              | Business logic layer that orchestrates repositories and domain operations |
+| `tests/`                 | Unit, integration, and API tests                                    |
+| `Dockerfile`             | Docker image build instructions                                     |
+| `docker-compose.yml`     | Local development and multi-container orchestration configuration   |
+| `requirements.txt`       | Python package dependencies                                         |
+| `.env.example`           | Example environment variables file                                  |
+| `.gitignore`             | Files and directories excluded from version control                 |
+| `README.md`              | Project documentation, setup instructions, and usage guide          |                               |
 
 ## Configuration
 

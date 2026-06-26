@@ -10,17 +10,16 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
+    """Application settings loaded from environment variables."""
+
+    DATABASE_URL: str = "postgresql+asyncpg://apikey_user:apikey_pass@db:5432/apikey_db"
     SERVICE_NAME: str = "api-key-management"
-    SERVICE_PORT: str = "8000"
-    SERVICE_URL: str = "localhost"
+    KEY_PREFIX_LIVE: str = "sk_live"
     KEY_PREFIX_TEST: str = "sk_test"
     KEY_PREFIX_DEV: str = "sk_dev"
     DEFAULT_KEY_LENGTH: int = 32
-    LOG_LEVEL: str = "INFO"
-    DATABASE_URL: str
 
-    class Config:
-        env_file = ".env"
+    model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 
 
 settings = Settings()
